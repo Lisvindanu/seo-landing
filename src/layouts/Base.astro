@@ -1,0 +1,81 @@
+---
+import '../styles/global.css';
+
+interface FaqItem { q: string; a: string }
+interface Props {
+  title: string;
+  description: string;
+  path?: string;
+  faq?: FaqItem[];
+}
+
+const { title, description, path = '/', faq = [] } = Astro.props;
+const site = Astro.site ?? new URL('https://seo.project-n.site');
+const canonical = new URL(path, site).href;
+const ogImage = new URL('/og.svg', site).href;
+
+const graph: Record<string, unknown>[] = [
+  {
+    '@type': 'WebPage',
+    '@id': `${site.origin}/#org`,
+    url: site.origin,
+    description: 'Pameran visual abstrak yang ditulis ulang oleh AI setiap hari — statis, tanpa request jaringan.',
+  },
+  {
+    '@type': 'WebSite',
+    '@id': `${site.origin}/#site`,
+    url: site.origin,
+    name: title,
+    publisher: { '@id': `${site.origin}/#org` },
+    inLanguage: 'id-ID',
+  },
+];
+
+if (faq.length) {
+  graph.push({
+    '@type': 'FAQPage',
+    '@id': `${canonical}#faq`,
+    mainEntity: faq.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  });
+}
+
+const jsonLd = JSON.stringify({ '@context': 'https://schema.org', '@graph': graph });
+---
+
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#f7f5f0" />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="id_ID" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <script type="application/ld+json" set:html={jsonLd} />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

@@ -1,0 +1,42 @@
+:root {
+  /* Color — light luxury, single warm accent, disciplined contrast */
+  --bg: oklch(98.5% 0.004 95);
+  --bg-raised: oklch(100% 0 0);
+  --ink: oklch(22% 0.02 75);
+  --ink-soft: oklch(46% 0.02 75);
+  --ink-faint: oklch(64% 0.015 75);
+  --line: oklch(90% 0.008 80);
+  --accent: oklch(58% 0.16 38);
+  --accent-ink: oklch(98% 0.01 38);
+
+  /* Type scale — strong contrast for hierarchy */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, monospace;
+
+  --text-xs: 0.78rem;
+  --text-sm: 0.9rem;
+  --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.1rem);
+  --text-lg: clamp(1.2rem, 1rem + 0.8vw, 1.5rem);
+  --text-xl: clamp(1.7rem, 1.2rem + 2vw, 2.6rem);
+  --text-display: clamp(2.6rem, 1.1rem + 6.4vw, 6rem);
+
+  --tracking-tight: -0.03em;
+  --tracking-wide: 0.14em;
+
+  /* Rhythm — varied, not uniform */
+  --space-1: 0.5rem;
+  --space-2: 0.875rem;
+  --space-3: 1.5rem;
+  --space-4: 2.5rem;
+  --space-section: clamp(4.5rem, 3rem + 7vw, 9rem);
+  --measure: 62ch;
+
+  --radius: 14px;
+  --radius-sm: 9px;
+
+  --duration: 320ms;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --shadow-sm: 0 1px 2px oklch(22% 0.02 75 / 0.06);
+  --shadow: 0 10px 30px -12px oklch(22% 0.02 75 / 0.18);
+}

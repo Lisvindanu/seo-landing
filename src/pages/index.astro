@@ -1,0 +1,31 @@
+---
+import Base from '../layouts/Base.astro';
+import DailyShowcase from '../components/DailyShowcase.astro';
+
+const title = 'Bidang Abstrak — Pameran Visual yang Ditulis Ulang Mesin';
+const description =
+  'Sebuah halaman pameran visual abstrak yang dibangun ulang oleh AI setiap hari. Statis, tanpa request jaringan, PageSpeed maksimal — komposisi baru tiap edisi.';
+
+const faq = [
+  {
+    q: 'Apa itu halaman ini?',
+    a: 'Sebuah pameran visual abstrak satu halaman. Setiap hari, sebuah AI menulis ulang komponen tampilannya sehingga komposisi, warna, dan tata letaknya berubah.',
+  },
+  {
+    q: 'Kenapa bisa secepat ini?',
+    a: 'Output-nya HTML statis dengan CSS yang di-inline dan nyaris tanpa JavaScript. Tidak ada request jaringan saat halaman dimuat, sehingga skor performa tetap maksimal.',
+  },
+  {
+    q: 'Bagaimana AI mengubahnya?',
+    a: 'Sebuah proses terjadwal di server menjalankan Claude untuk menulis ulang satu komponen kanvas, lalu situs di-build ulang. Jika build gagal, sistem otomatis kembali ke versi terakhir yang berhasil.',
+  },
+];
+---
+
+<Base title={title} description={description} path="/" faq={faq}>
+  <DailyShowcase />
+</Base>
+
+<style is:global>
+  html, body { background: var(--bg); margin: 0; min-height: 100%; }
+</style>

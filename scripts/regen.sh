@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+#
+# Daily AI regeneration with auto-rollback.
+#   backup -> Claude rewrites DailyShowcase.astro -> build -> deploy (on success) / restore (on fail)
+#
+# Run from cron, e.g. once a day at 04:00:
+#   0 4 * * *  /path/to/seo-landing/scripts/regen.sh >> /path/to/seo-landing/.regen/cron.log 2>&1
+#
+# Requirements: the `claude` CLI on PATH and logged in, Node/npm installed.
+# Optional: set DEPLOY_CMD to your publish step (e.g. "rsync ...", "vercel deploy --prod", "npx wrangler pages deploy dist").
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT"
+
+TARGET="src/components/DailyShowcase.astro"
+STATE=".regen"
+BACKUP="$STATE/last-good.astro"
+HISTORY="$STATE/history"
+PROMPT_FILE="scripts/regen-prompt.md"
+TODAY="$(date +%F)"
+STAMP="$(date +%Y%m%d-%H%M%S)"
+
+mkdir -p "$HISTORY"
+log() { printf '[regen %s] %s\n' "$(date +%FT%T)" "$*"; }
+
+# 0) Seed last-good from current file on first run.
+[ -f "$BACKUP" ] || cp "$TARGET" "$BACKUP"
+
+# 1) Snapshot the current (known-good) file before we let the AI touch it.
+PRE="$STATE/pre-$STAMP.astro"
+cp "$TARGET" "$PRE"
+log "snapshot saved -> $PRE"
+
+# 2) Let Claude rewrite the canvas in place.
+PROMPT="$(cat "$PROMPT_FILE")
+Today's date is: $TODAY
+Now rewrite $TARGET."
+
+log "invoking claude..."
+if ! claude -p "$PROMPT" \
+      --permission-mode acceptEdits \
+      --allowedTools "Read,Edit,Write" \
+      --add-dir "$ROOT" >"$STATE/claude-$STAMP.log" 2>&1; then
+  log "claude invocation failed — restoring pre-snapshot"
+  cp "$PRE" "$TARGET"
+  exit 1
+fi
+
+# 3) Build. If it breaks, roll back to the last KNOWN-GOOD version (not the broken AI output).
+log "building..."
+if npm run build >"$STATE/build-$STAMP.log" 2>&1; then
+  log "build OK"
+  cp "$TARGET" "$BACKUP"                       # promote: this is the new known-good
+  cp "$TARGET" "$HISTORY/$TODAY.astro"         # keep a per-day archive
+  if [ -n "${DEPLOY_CMD:-}" ]; then
+    log "deploying: $DEPLOY_CMD"
+    if eval "$DEPLOY_CMD" >"$STATE/deploy-$STAMP.log" 2>&1; then
+      log "deploy OK"
+    else
+      log "deploy FAILED — site source is fine, check deploy-$STAMP.log"
+      exit 2
+    fi
+  else
+    log "no DEPLOY_CMD set — dist/ is built and ready to publish"
+  fi
+else
+  log "build FAILED — rolling back to last-good and rebuilding"
+  cp "$BACKUP" "$TARGET"
+  npm run build >"$STATE/rebuild-$STAMP.log" 2>&1 || log "WARNING: rollback rebuild also failed (check rebuild-$STAMP.log)"
+  exit 1
+fi
+
+# 4) Trim history (keep last 30 snapshots/pre files).
+ls -1t "$STATE"/pre-*.astro 2>/dev/null | tail -n +31 | xargs -r rm -f
+log "done — edition for $TODAY is live"

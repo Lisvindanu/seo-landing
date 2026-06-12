@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.astro/
+.regen/
+*.log
+.DS_Store
+.env
+.env.*
+.claude-flow/
+.preview-*.png

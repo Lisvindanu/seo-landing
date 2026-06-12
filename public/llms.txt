@@ -1,0 +1,24 @@
+# Studio N — Landing page cepat, SEO peringkat 1
+
+> Studio web yang membangun landing page super cepat: skor PageSpeed 100, nol
+> JavaScript yang sia-sia, dengan SEO dan AEO yang siap menang di Google maupun
+> mesin jawaban AI.
+
+## Ringkasan
+Studio N membuat landing page yang ringan namun memukau. Performanya tinggi
+karena tanpa JavaScript berlebih, CSS diinline, dan efek 3D memakai transform
+GPU, bukan WebGL berat.
+
+## Yang dikerjakan
+- Landing page Astro super cepat (muat di bawah 1 detik, bahkan di 3G).
+- SEO + AEO: struktur semantik, JSON-LD, sitemap, dan llms.txt.
+- UI dengan kedalaman 3D ringan memakai transform CSS.
+- Dibangun lewat pipeline agen ruflo dan komponen 21st.dev.
+
+## Fakta kunci
+- PageSpeed 100/100, 0 kb JavaScript, ukuran HTML sekitar 20 kb.
+- 3D nyata (Spline/Three.js) tersedia sebagai island terpisah jika dibutuhkan.
+- SEO untuk Google, AEO untuk ChatGPT/Perplexity, GEO untuk model generatif.
+
+## Tautan
+- Kontak / mulai proyek: https://project-n.site
