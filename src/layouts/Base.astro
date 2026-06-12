@@ -77,5 +77,32 @@ const jsonLd = JSON.stringify({ '@context': 'https://schema.org', '@graph': grap
   </head>
   <body>
     <slot />
+    <footer class="site-foot" aria-label="Navigasi situs">
+      <a href="/">Beranda</a>
+      <span class="site-foot__dot" aria-hidden="true">·</span>
+      <a href="/arsip/">Arsip edisi</a>
+    </footer>
+    <style>
+      .site-foot {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 1.5rem 1rem 2.25rem;
+        font-family: var(--font-mono, ui-monospace, monospace);
+        font-size: 0.74rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--ink-faint, #999);
+        border-top: 1px solid var(--line, #e5e1d8);
+      }
+      .site-foot a {
+        color: var(--ink-soft, #555);
+        text-decoration: none;
+        transition: color 0.25s var(--ease, ease);
+      }
+      .site-foot a:hover { color: var(--accent, #b5641e); }
+      .site-foot__dot { color: var(--ink-faint, #bbb); }
+    </style>
   </body>
 </html>

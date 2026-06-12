@@ -1,0 +1,174 @@
+---
+import Base from '../../layouts/Base.astro';
+import editions from '../../data/editions.json';
+
+const list = [...editions].sort((a, b) => b.no - a.no);
+const total = list.length;
+const latest = list[0];
+
+const title = 'Arsip Edisi — Bidang Abstrak';
+const description = `Daftar ${total} edisi harian yang ditulis ulang oleh mesin. Tiap edisi adalah halaman beku — komposisi, palet, dan teknik berbeda.`;
+---
+
+<Base title={title} description={description} path="/arsip/">
+  <main class="arsip">
+    <header class="arsip__head">
+      <p class="arsip__kicker">Daftar isi / kumpulan edisi</p>
+      <h1 class="arsip__title">Arsip</h1>
+      <p class="arsip__lede">
+        Tiap hari mesin menulis ulang halaman ini menjadi komposisi yang berbeda.
+        Yang lama tidak hilang — ia dibekukan sebagai satu halaman, seperti lembar dalam sebuah buku.
+      </p>
+      <dl class="arsip__stats">
+        <div><dt>Total edisi</dt><dd>{String(total).padStart(3, '0')}</dd></div>
+        <div><dt>Terbaru</dt><dd>{latest.title}</dd></div>
+        <div><dt>Diperbarui</dt><dd>{latest.date}</dd></div>
+      </dl>
+    </header>
+
+    <ol class="arsip__grid" role="list">
+      {list.map((ed) => (
+        <li class="card">
+          <a class="card__link" href={`/edisi/${ed.slug}/`} aria-label={`Buka edisi ${ed.slug}: ${ed.title}`}>
+            <span class="card__cover" aria-hidden="true" data-no={ed.slug}></span>
+            <span class="card__meta">
+              <span class="card__no">Edisi {ed.slug}</span>
+              <span class="card__date">{ed.date}</span>
+            </span>
+            <span class="card__name">{ed.title}</span>
+            <span class="card__sub">{ed.subtitle}</span>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </main>
+</Base>
+
+<style>
+  .arsip {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: clamp(3rem, 2rem + 6vw, 7rem) var(--space-4, 1.5rem) var(--space-8, 6rem);
+    color: var(--ink);
+  }
+  .arsip__head { max-width: 44rem; margin-bottom: clamp(2.5rem, 5vw, 4.5rem); }
+  .arsip__kicker {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 0 0 0.75rem;
+  }
+  .arsip__title {
+    font-size: var(--text-display, clamp(2.6rem, 1.1rem + 6.4vw, 6rem));
+    line-height: 0.92;
+    letter-spacing: -0.02em;
+    margin: 0 0 1rem;
+    background: linear-gradient(118deg, var(--ink) 30%, oklch(58% 0.16 38) 115%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    width: fit-content;
+    max-width: 100%;
+  }
+  .arsip__lede {
+    font-size: clamp(1rem, 0.95rem + 0.3vw, 1.18rem);
+    line-height: 1.55;
+    color: var(--ink-soft);
+    margin: 0 0 2rem;
+  }
+  .arsip__stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(1.5rem, 4vw, 3rem);
+    margin: 0;
+    font-family: var(--font-mono);
+  }
+  .arsip__stats dt {
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  .arsip__stats dd { margin: 0.2rem 0 0; font-size: 1.05rem; color: var(--ink); }
+
+  .arsip__grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(15.5rem, 1fr));
+    gap: clamp(1rem, 2vw, 1.6rem);
+  }
+  .card { margin: 0; }
+  .card__link {
+    display: grid;
+    gap: 0.6rem;
+    height: 100%;
+    padding: 0.9rem 0.9rem 1.2rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius, 12px);
+    background: var(--bg-raised, oklch(99% 0.004 80));
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.3s var(--ease), transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+  }
+  .card__link:hover {
+    border-color: var(--accent);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow, 0 18px 40px -24px oklch(40% 0.05 60 / 0.5));
+  }
+  .card__cover {
+    position: relative;
+    display: block;
+    aspect-ratio: 16 / 10;
+    border-radius: calc(var(--radius, 12px) - 4px);
+    overflow: hidden;
+    background:
+      conic-gradient(from calc(var(--seed) * 1deg) at 32% 28%, oklch(70% 0.16 var(--hue)), oklch(58% 0.17 calc(var(--hue) + 60)), oklch(80% 0.10 calc(var(--hue) + 180)), oklch(70% 0.16 var(--hue))),
+      radial-gradient(120% 90% at 80% 110%, oklch(96% 0.02 90), transparent 60%);
+    --seed: 40;
+    --hue: 40;
+  }
+  .card__cover::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      calc(var(--seed) * 1deg),
+      oklch(100% 0 0 / 0.10) 0 2px,
+      transparent 2px 9px
+    );
+    mix-blend-mode: overlay;
+  }
+  .card__cover[data-no='001'] { --seed: 118; --hue: 250; }
+  .card__cover[data-no='002'] { --seed: 36; --hue: 30; }
+  .card__cover[data-no='003'] { --seed: 200; --hue: 150; }
+  .card__cover[data-no='004'] { --seed: 78; --hue: 320; }
+  .card__cover[data-no='005'] { --seed: 320; --hue: 90; }
+
+  .card__meta {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+  }
+  .card__name { font-size: 1.3rem; line-height: 1.1; letter-spacing: -0.01em; }
+  .card__sub {
+    font-size: 0.86rem;
+    line-height: 1.5;
+    color: var(--ink-soft);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card__link:hover { transform: none; }
+  }
+</style>

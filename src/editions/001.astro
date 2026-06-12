@@ -1,0 +1,289 @@
+---
+/*
+ * DailyShowcase — the AI-owned canvas.
+ * Rewritten in full by Claude once per day (scripts/regen.sh).
+ * Contract: self-contained Astro component (frontmatter + markup + scoped <style>).
+ * No imports, no network (no fonts/images/CDN/fetch), no client JS beyond tiny
+ * compositor-only motion. Must compile with `astro build`. SEO <head> lives in
+ * Base.astro — leave it alone. Reuse tokens from src/styles/tokens.css.
+ * The frontmatter is the only state carried across days.
+ *
+ * Quality bar (keep it RICH, not bare): layered hero with weight, a bento gallery
+ * where EACH plate is a real generative-CSS artwork, grain texture, a moving
+ * marquee, intentional asymmetry. Avoid a plain centered-headline page.
+ */
+const edition = {
+  no: 1,
+  date: '2026-06-13',
+  title: 'Lapisan',
+  kicker: 'Pameran harian / komposisi generatif',
+  subtitle:
+    'Sebuah bidang abstrak yang ditulis ulang oleh mesin setiap hari — warna, tata letak, dan teknik berubah tiap edisi.',
+};
+
+const stats = [
+  { k: '00', label: 'request jaringan' },
+  { k: '∞', label: 'kemungkinan komposisi' },
+  { k: '24j', label: 'siklus tulis-ulang' },
+];
+
+const plates = [
+  { id: 'termal', tag: 'I', name: 'Gradien Termal', note: 'radial · mesh', size: 'feature' },
+  { id: 'interferensi', tag: 'II', name: 'Interferensi', note: 'moiré · 7°', size: '' },
+  { id: 'difraksi', tag: 'III', name: 'Difraksi', note: 'conic · spektrum', size: '' },
+  { id: 'anyaman', tag: 'IV', name: 'Anyaman', note: 'grid · tenun', size: '' },
+  { id: 'sedimen', tag: 'V', name: 'Sedimen', note: 'pita · oklch', size: 'wide' },
+  { id: 'gerhana', tag: 'VI', name: 'Gerhana', note: 'mask · blend', size: '' },
+];
+
+const glyphs = ['◍', 'λ', '∆', '⊕', '◐', '※', '∿', '⟁', '◫', 'φ', '⊗', '✺'];
+const marquee = [...glyphs, ...glyphs];
+---
+
+<section class="stage" aria-label="Pameran visual abstrak">
+  <div class="atmos" aria-hidden="true">
+    <span class="orb orb-a"></span>
+    <span class="orb orb-b"></span>
+    <span class="orb orb-c"></span>
+    <span class="mesh"></span>
+  </div>
+
+  <header class="masthead">
+    <span class="ed">Edisi {String(edition.no).padStart(3, '0')}</span>
+    <span class="ed-mid">{edition.kicker}</span>
+    <span class="ed-date">{edition.date}</span>
+  </header>
+
+  <div class="hero">
+    <span class="huge-no" aria-hidden="true">{String(edition.no).padStart(2, '0')}</span>
+    <div class="hero-text">
+      <p class="kicker">{edition.kicker}</p>
+      <h1 class="title">{edition.title}</h1>
+      <p class="lede">{edition.subtitle}</p>
+      <dl class="stats">
+        {stats.map((s) => (
+          <div class="stat">
+            <dt class="stat-k">{s.k}</dt>
+            <dd class="stat-l">{s.label}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </div>
+
+  <section class="gallery" aria-label="Spesimen visual">
+    {plates.map((p) => (
+      <figure class={`plate ${p.size}`}>
+        <span class={`art art-${p.id}`} aria-hidden="true"></span>
+        <figcaption class="cap">
+          <span class="cap-tag">{p.tag}</span>
+          <span class="cap-body">
+            <b class="cap-name">{p.name}</b>
+            <i class="cap-note">{p.note}</i>
+          </span>
+        </figcaption>
+      </figure>
+    ))}
+  </section>
+
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track">
+      {marquee.map((g) => <span class="gl">{g}</span>)}
+    </div>
+  </div>
+
+  <footer class="colophon">
+    <span>Ditulis ulang oleh mesin · CSS murni · 0 request jaringan</span>
+    <span class="pulse"><i></i> realtime build</span>
+  </footer>
+</section>
+
+<style>
+  .stage {
+    position: relative; isolation: isolate; overflow: hidden;
+    display: flex; flex-direction: column; gap: clamp(2.2rem, 5vw, 4.5rem);
+    padding: clamp(1.4rem, 4vw, 3rem);
+    color: var(--ink); font-family: var(--font-sans);
+  }
+  /* film grain over everything */
+  .stage::after {
+    content: ''; position: fixed; inset: 0; z-index: 40; pointer-events: none;
+    opacity: 0.045; mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ambient color field */
+  .atmos { position: absolute; inset: 0; z-index: -1; filter: saturate(1.06); }
+  .orb {
+    position: absolute; border-radius: 50%; filter: blur(64px); opacity: 0.5;
+    mix-blend-mode: multiply; will-change: transform;
+    animation: drift 24s var(--ease) infinite alternate;
+  }
+  .orb-a { width: 48vmax; height: 48vmax; top: -14vmax; left: -8vmax;
+    background: radial-gradient(circle, oklch(73% 0.16 38), transparent 70%); }
+  .orb-b { width: 42vmax; height: 42vmax; bottom: -16vmax; right: -10vmax;
+    background: radial-gradient(circle, oklch(70% 0.13 255), transparent 70%);
+    animation-duration: 30s; animation-delay: -7s; }
+  .orb-c { width: 30vmax; height: 30vmax; top: 36%; left: 46%;
+    background: radial-gradient(circle, oklch(75% 0.14 150), transparent 70%);
+    animation-duration: 38s; animation-delay: -14s; }
+  @keyframes drift {
+    from { transform: translate3d(0,0,0) scale(1); }
+    to   { transform: translate3d(7vmax,-5vmax,0) scale(1.18); }
+  }
+  .mesh {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(oklch(22% 0.02 75 / 0.045) 1px, transparent 1px),
+      linear-gradient(90deg, oklch(22% 0.02 75 / 0.045) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(130% 100% at 50% 0%, #000 25%, transparent 78%);
+  }
+
+  /* masthead */
+  .masthead {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 1rem;
+    font-family: var(--font-mono); font-size: var(--text-xs);
+    letter-spacing: var(--tracking-wide); text-transform: uppercase; color: var(--ink-soft);
+    border-bottom: 1px solid var(--line); padding-bottom: var(--space-2);
+  }
+  .ed-mid { color: var(--ink-faint); display: none; }
+  .ed-date { color: var(--accent); }
+  @media (min-width: 720px) { .ed-mid { display: inline; } }
+
+  /* hero — layered, with an oversized edition numeral behind the text */
+  .hero { position: relative; display: grid; align-items: center; padding-block: clamp(1rem, 4vw, 3rem); }
+  .huge-no {
+    position: absolute; right: -2vw; top: 50%; translate: 0 -50%; z-index: -1;
+    font-family: var(--font-mono); font-weight: 800; line-height: 1;
+    font-size: clamp(10rem, 38vw, 30rem); letter-spacing: -0.04em;
+    color: transparent; -webkit-text-stroke: 1.5px oklch(22% 0.02 75 / 0.07);
+    text-stroke: 1.5px oklch(22% 0.02 75 / 0.07); pointer-events: none; user-select: none;
+  }
+  .hero-text { max-width: min(100%, 56ch); }
+  .kicker {
+    margin: 0 0 var(--space-2); font-family: var(--font-mono);
+    font-size: var(--text-xs); letter-spacing: var(--tracking-wide);
+    text-transform: uppercase; color: var(--accent);
+  }
+  .title {
+    width: fit-content; max-width: 100%; margin: 0;
+    font-size: var(--text-display); line-height: 0.9; font-weight: 800;
+    letter-spacing: var(--tracking-tight);
+    background: linear-gradient(118deg, var(--ink) 20%, oklch(46% 0.17 38) 110%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .lede {
+    margin: var(--space-3) 0 0; max-width: 46ch;
+    font-family: var(--font-mono); font-size: var(--text-lg);
+    line-height: 1.45; color: var(--ink-soft);
+  }
+  .stats { display: flex; flex-wrap: wrap; gap: clamp(1.5rem, 5vw, 3.5rem); margin: var(--space-4) 0 0; }
+  .stat { display: flex; flex-direction: column; gap: 0.2rem; }
+  .stat-k { font-size: var(--text-xl); font-weight: 800; letter-spacing: -0.02em; line-height: 1; }
+  .stat-l {
+    font-family: var(--font-mono); font-size: var(--text-xs);
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint);
+  }
+
+  /* bento gallery — each plate is a generative CSS artwork */
+  .gallery {
+    display: grid; gap: clamp(0.7rem, 1.5vw, 1.1rem);
+    grid-template-columns: repeat(2, 1fr); grid-auto-rows: 12rem;
+  }
+  @media (min-width: 720px) {
+    .gallery { grid-template-columns: repeat(4, 1fr); grid-auto-rows: 13rem; }
+    .plate.feature { grid-column: span 2; grid-row: span 2; }
+    .plate.wide { grid-column: span 2; }
+  }
+  .plate {
+    position: relative; overflow: hidden; border-radius: var(--radius);
+    border: 1px solid var(--line); background: var(--bg-raised);
+    box-shadow: var(--shadow-sm); transition: transform var(--duration) var(--ease), box-shadow var(--duration) var(--ease);
+  }
+  .plate:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+  .art { position: absolute; inset: 0; }
+  .cap {
+    position: absolute; inset: auto 0 0 0; z-index: 2;
+    display: flex; gap: var(--space-2); align-items: flex-end;
+    padding: var(--space-2) var(--space-3);
+    background: linear-gradient(0deg, oklch(100% 0 0 / 0.82), transparent);
+    backdrop-filter: blur(2px);
+  }
+  .cap-tag { font-family: var(--font-mono); font-weight: 700; font-size: var(--text-sm); color: var(--accent); }
+  .cap-body { display: flex; flex-direction: column; }
+  .cap-name { font-weight: 650; letter-spacing: -0.01em; }
+  .cap-note { font-style: normal; font-family: var(--font-mono); font-size: var(--text-xs); color: var(--ink-faint); }
+
+  /* --- generative artworks --- */
+  .art-termal {
+    background:
+      radial-gradient(40% 60% at 25% 30%, oklch(80% 0.17 50), transparent 70%),
+      radial-gradient(45% 55% at 75% 40%, oklch(72% 0.16 22), transparent 72%),
+      radial-gradient(50% 60% at 55% 85%, oklch(68% 0.14 320), transparent 75%),
+      linear-gradient(140deg, oklch(95% 0.04 60), oklch(88% 0.06 30));
+    filter: saturate(1.1);
+  }
+  .art-interferensi {
+    background:
+      repeating-linear-gradient(0deg, oklch(40% 0.04 255) 0 2px, transparent 2px 7px),
+      repeating-linear-gradient(7deg, oklch(45% 0.05 30) 0 2px, transparent 2px 7px);
+    background-color: oklch(96% 0.01 255);
+  }
+  .art-difraksi {
+    background: conic-gradient(from 0deg,
+      oklch(70% 0.18 20), oklch(72% 0.16 90), oklch(70% 0.16 160),
+      oklch(68% 0.16 250), oklch(72% 0.18 320), oklch(70% 0.18 20));
+    mask-image: radial-gradient(circle at 50% 50%, transparent 14%, #000 16% 60%, transparent 62%);
+    -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent 14%, #000 16% 60%, transparent 62%);
+    animation: spin 26s linear infinite; will-change: transform;
+  }
+  .art-anyaman {
+    background-color: oklch(94% 0.02 60);
+    background-image:
+      repeating-linear-gradient(90deg, oklch(58% 0.16 38 / 0.5) 0 6px, transparent 6px 16px),
+      repeating-linear-gradient(0deg, oklch(40% 0.06 255 / 0.45) 0 6px, transparent 6px 16px);
+  }
+  .art-sedimen {
+    background: linear-gradient(0deg,
+      oklch(62% 0.14 30) 0 14%, oklch(70% 0.12 60) 14% 30%,
+      oklch(78% 0.10 110) 30% 46%, oklch(72% 0.11 180) 46% 62%,
+      oklch(66% 0.13 250) 62% 80%, oklch(60% 0.15 320) 80% 100%);
+    filter: saturate(0.95) contrast(1.02);
+  }
+  .art-gerhana {
+    background:
+      radial-gradient(circle at 38% 42%, oklch(20% 0.03 280) 0 30%, transparent 31%),
+      conic-gradient(from 210deg at 62% 58%, oklch(82% 0.13 60), oklch(70% 0.16 300), oklch(82% 0.13 60));
+    mix-blend-mode: normal;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* marquee */
+  .marquee {
+    overflow: hidden; border-block: 1px solid var(--line);
+    padding-block: var(--space-2); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  }
+  .marquee-track {
+    display: flex; gap: clamp(2rem, 6vw, 5rem); width: max-content;
+    animation: scroll 30s linear infinite; will-change: transform;
+  }
+  .gl { font-size: var(--text-xl); color: var(--ink-faint); font-family: var(--font-mono); }
+  @keyframes scroll { to { transform: translateX(-50%); } }
+
+  /* colophon */
+  .colophon {
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;
+    font-family: var(--font-mono); font-size: var(--text-xs);
+    letter-spacing: 0.06em; color: var(--ink-faint);
+    border-top: 1px solid var(--line); padding-top: var(--space-2); padding-bottom: var(--space-3);
+  }
+  .pulse { display: inline-flex; align-items: center; gap: 0.45rem; }
+  .pulse i { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: blip 1.8s var(--ease) infinite; }
+  @keyframes blip { 0%,100% { opacity: 1; } 50% { opacity: 0.25; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .orb, .pulse i, .art-difraksi, .marquee-track { animation: none; }
+  }
+</style>

@@ -61,6 +61,10 @@ if ! claude -p "$PROMPT" \
   exit 1
 fi
 
+# 2b) Freeze this edition as an immutable archive page and update the manifest.
+SLUG="$(node scripts/archive-edition.mjs 2>>"$STATE/claude-$STAMP.log")" || SLUG=""
+[ -n "$SLUG" ] && log "archived edition -> src/editions/$SLUG.astro" || log "WARNING: archive-edition failed"
+
 # 3) Build. If it breaks, roll back to the last KNOWN-GOOD version (not the broken AI output).
 log "building..."
 if npm run build >"$STATE/build-$STAMP.log" 2>&1; then
@@ -70,7 +74,7 @@ if npm run build >"$STATE/build-$STAMP.log" 2>&1; then
 
   # Push the new edition back to GitHub (best-effort; local dist/ is the live deploy either way).
   if git rev-parse --git-dir >/dev/null 2>&1; then
-    git add "$TARGET"
+    git add "$TARGET" src/editions src/data/editions.json
     if git diff --cached --quiet; then
       log "no component change to commit"
     else
@@ -97,6 +101,11 @@ if npm run build >"$STATE/build-$STAMP.log" 2>&1; then
 else
   log "build FAILED — rolling back to last-good and rebuilding"
   cp "$BACKUP" "$TARGET"
+  # Undo the archive snapshot + manifest entry created for this failed edition.
+  if git rev-parse --git-dir >/dev/null 2>&1; then
+    [ -n "$SLUG" ] && git rm -f --quiet "src/editions/$SLUG.astro" 2>/dev/null || rm -f "src/editions/$SLUG.astro" 2>/dev/null
+    git checkout -- src/data/editions.json 2>/dev/null || true
+  fi
   npm run build >"$STATE/rebuild-$STAMP.log" 2>&1 || log "WARNING: rollback rebuild also failed (check rebuild-$STAMP.log)"
   exit 1
 fi
