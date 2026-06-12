@@ -24,6 +24,13 @@ STAMP="$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$HISTORY"
 log() { printf '[regen %s] %s\n' "$(date +%FT%T)" "$*"; }
 
+# Prevent overlapping runs (cron firing while a manual run is in flight, etc).
+exec 9>"$STATE/.lock"
+if command -v flock >/dev/null 2>&1 && ! flock -n 9; then
+  log "another run holds the lock — exiting"
+  exit 0
+fi
+
 # 0) Seed last-good from current file on first run.
 [ -f "$BACKUP" ] || cp "$TARGET" "$BACKUP"
 
@@ -47,6 +54,7 @@ log "invoking claude..."
 if ! claude -p "$PROMPT" \
       --permission-mode acceptEdits \
       --allowedTools "Read,Edit,Write" \
+      --strict-mcp-config \
       --add-dir "$ROOT" >"$STATE/claude-$STAMP.log" 2>&1; then
   log "claude invocation failed — restoring pre-snapshot"
   cp "$PRE" "$TARGET"
