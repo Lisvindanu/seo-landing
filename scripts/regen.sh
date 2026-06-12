@@ -27,6 +27,12 @@ log() { printf '[regen %s] %s\n' "$(date +%FT%T)" "$*"; }
 # 0) Seed last-good from current file on first run.
 [ -f "$BACKUP" ] || cp "$TARGET" "$BACKUP"
 
+# 0b) Stay in sync with origin before regenerating (best-effort, only if tree is clean).
+if git rev-parse --git-dir >/dev/null 2>&1 && git diff --quiet && git diff --cached --quiet; then
+  git pull --rebase --autostash origin "$(git rev-parse --abbrev-ref HEAD)" >/dev/null 2>&1 \
+    && log "synced with origin" || log "git pull skipped/failed (continuing)"
+fi
+
 # 1) Snapshot the current (known-good) file before we let the AI touch it.
 PRE="$STATE/pre-$STAMP.astro"
 cp "$TARGET" "$PRE"
@@ -53,6 +59,22 @@ if npm run build >"$STATE/build-$STAMP.log" 2>&1; then
   log "build OK"
   cp "$TARGET" "$BACKUP"                       # promote: this is the new known-good
   cp "$TARGET" "$HISTORY/$TODAY.astro"         # keep a per-day archive
+
+  # Push the new edition back to GitHub (best-effort; local dist/ is the live deploy either way).
+  if git rev-parse --git-dir >/dev/null 2>&1; then
+    git add "$TARGET"
+    if git diff --cached --quiet; then
+      log "no component change to commit"
+    else
+      if git commit -m "chore: daily edition for $TODAY" >"$STATE/git-$STAMP.log" 2>&1 \
+         && git push origin HEAD >>"$STATE/git-$STAMP.log" 2>&1; then
+        log "pushed edition to origin"
+      else
+        log "git commit/push failed (see git-$STAMP.log)"
+      fi
+    fi
+  fi
+
   if [ -n "${DEPLOY_CMD:-}" ]; then
     log "deploying: $DEPLOY_CMD"
     if eval "$DEPLOY_CMD" >"$STATE/deploy-$STAMP.log" 2>&1; then
