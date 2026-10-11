@@ -1,0 +1,649 @@
+---
+/*
+ * DailyShowcase — the AI-owned canvas.
+ * Rewritten in full by Claude once per day (scripts/regen.sh).
+ * Contract: self-contained Astro component (frontmatter + markup + scoped <style>).
+ * No imports, no network (no fonts/images/CDN/fetch), no client JS beyond tiny
+ * compositor-only motion. Must compile with `astro build`. SEO <head> lives in
+ * Base.astro — leave it alone. Reuse tokens from src/styles/tokens.css.
+ * The frontmatter is the only state carried across days.
+ *
+ * Quality bar (keep it RICH, not bare): layered hero with weight, a bento gallery
+ * where EACH plate is a real generative-CSS artwork, grain texture, a moving
+ * marquee, intentional asymmetry. Avoid a plain centered-headline page.
+ *
+ * Edition 093 climbs out of the damp shade and looks straight up. 092 (LUMUT) was
+ * a moss ground where colour grew slowly; 093 is GERHANA — an indigo VOID (h≈275,
+ * L≈15%) where light is only ever seen at its edges, as a rim around something dark.
+ * Palette family: void indigo (h≈275–285), corona gold (h≈82), ember (h≈45, near
+ * the --accent token), cold ice (h≈210) and a plasma magenta (h≈350) prominence.
+ * Composition flips again: the numeral is cropped by the LEFT and TOP edges, drawn
+ * as a hollow stroked ring with scan-lines and a plasma ghost; type holds the RIGHT,
+ * right-aligned. Stats become horizontal phase meters. Gallery feature anchors LEFT
+ * with two stacked plates to its right; the wide plate lies along the RIGHT floor.
+ * Marquee runs LEFTWARD between two corona hairlines.
+ * Fresh techniques: rotating repeating-conic corona around an occluding disc,
+ * tilted elliptical orbit rings, difference-blended umbra discs, banded horizon
+ * strata with near-parallel line moiré, prime-tiled star dust with a twinkle,
+ * drifting tile-size phase moiré (moon phases), skewed aurora curtains, and
+ * clip-path prism dispersion.
+ */
+const edition = {
+  no: 93,
+  date: '2026-10-12',
+  title: 'Gerhana',
+  kicker: 'Pameran harian / tentang cahaya yang dipinjam lalu dikembalikan',
+  subtitle:
+    'Sebentar saja, yang kecil berdiri tepat di depan yang besar — dan langit siang belajar caranya menjadi gelap.',
+};
+
+const stats = [
+  { k: '7:32', label: 'menit terlama bulan sanggup menutup matahari', pct: 64 },
+  { k: '400×', label: 'lebih besar, dan 400× lebih jauh — kebetulan yang pas', pct: 100 },
+  { k: '1,3 dtk', label: 'waktu cahaya bulan tiba di matamu', pct: 13 },
+];
+
+const plates = [
+  { id: 'korona',   tag: 'I',    name: 'Korona',   note: 'conic corona · mahkota yang hanya tampak saat ditutup', size: 'feature' },
+  { id: 'lintasan', tag: 'II',   name: 'Lintasan', note: 'orbit rings · jalan yang tak pernah sampai',           size: 'side' },
+  { id: 'bayang',   tag: 'III',  name: 'Bayang',   note: 'difference discs · umbra memakan penumbra',           size: 'side' },
+  { id: 'ufuk',     tag: 'IV',   name: 'Ufuk',     note: 'banded strata · garis tempat siang menyerah',         size: 'wide' },
+  { id: 'debu',     tag: 'V',    name: 'Debu',     note: 'prime tiles · bintang yang berkedip tidak serempak',   size: '' },
+  { id: 'fase',     tag: 'VI',   name: 'Fase',     note: 'tile moiré · bulan yang menipis satu per satu',        size: '' },
+  { id: 'kutub',    tag: 'VII',  name: 'Kutub',    note: 'skew curtains · tirai yang ditiup angin matahari',     size: '' },
+  { id: 'prisma',   tag: 'VIII', name: 'Prisma',   note: 'clip dispersion · satu sinar, tujuh pengakuan',        size: '' },
+];
+
+const glyphs = ['☉', '◐', '✶', '◑', '☾', '⊙', '✧', '◒', '∘', '◓'];
+const marquee = [...glyphs, ...glyphs];
+---
+
+<section class="stage" aria-label={`Pameran visual abstrak — ${edition.title}`}>
+  <div class="atmos" aria-hidden="true">
+    <span class="glow glow-a"></span>
+    <span class="glow glow-b"></span>
+    <span class="glow glow-c"></span>
+    <span class="field"></span>
+  </div>
+
+  <header class="masthead">
+    <span class="ed"><i aria-hidden="true"></i>Edisi {String(edition.no).padStart(3, '0')}</span>
+    <span class="ed-mid">{edition.kicker}</span>
+    <span class="ed-date">{edition.date}</span>
+  </header>
+
+  <div class="hero">
+    <div class="huge-wrap" aria-hidden="true">
+      <span class="huge-ghost">{String(edition.no).padStart(2, '0')}</span>
+      <span class="huge-no">{String(edition.no).padStart(2, '0')}</span>
+    </div>
+    <div class="hero-text">
+      <p class="kicker">Spesimen harian · catatan dari bawah bayangan</p>
+      <h1 class="title">{edition.title}</h1>
+      <p class="lede">{edition.subtitle}</p>
+    </div>
+    <dl class="stats">
+      {stats.map((s) => (
+        <div class="stat" style={`--pct: ${s.pct}%`}>
+          <dt class="stat-k">{s.k}</dt>
+          <dd class="stat-l">{s.label}</dd>
+          <span class="meter" aria-hidden="true"><i></i></span>
+        </div>
+      ))}
+    </dl>
+  </div>
+
+  <section class="gallery" aria-label="Fragmen visual">
+    {plates.map((p) => (
+      <figure class={`plate ${p.size}`}>
+        <span class={`art art-${p.id}`} aria-hidden="true"><i class="layer"></i></span>
+        <figcaption class="cap">
+          <span class="cap-tag">{p.tag}</span>
+          <span class="cap-body">
+            <b class="cap-name">{p.name}</b>
+            <i class="cap-note">{p.note}</i>
+          </span>
+        </figcaption>
+      </figure>
+    ))}
+  </section>
+
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track">
+      {marquee.map((g) => <span class="gl">{g}</span>)}
+    </div>
+  </div>
+
+  <footer class="colophon">
+    <span class="pulse"><i></i> setiap cahaya di halaman ini hanya terlihat di tepi sesuatu yang gelap</span>
+    <span>Edisi {String(edition.no).padStart(3, '0')} · {edition.title} · CSS murni · tanpa aset eksternal</span>
+  </footer>
+</section>
+
+<style>
+  /* an indigo VOID — light only ever appears as a rim around something dark */
+  .stage {
+    --pad: clamp(1.2rem, 4vw, 3rem);
+    --void: oklch(15% 0.035 275);
+    --void-2: oklch(20% 0.05 280);
+    --dusk: oklch(28% 0.07 285);
+    --corona: oklch(86% 0.14 82);
+    --ember: oklch(68% 0.17 45);
+    --ice: oklch(82% 0.09 210);
+    --plasma: oklch(62% 0.21 350);
+    --star: oklch(96% 0.015 260);
+    --haze: oklch(72% 0.035 270);
+
+    position: relative; isolation: isolate; overflow: hidden;
+    display: flex; flex-direction: column; gap: clamp(2rem, 5vw, 4.5rem);
+    padding: var(--pad);
+    border-radius: var(--radius);
+    background:
+      radial-gradient(ellipse 55% 42% at 0% 0%, oklch(30% 0.09 290 / 0.9), transparent 70%),
+      radial-gradient(ellipse 48% 36% at 100% 100%, oklch(30% 0.1 350 / 0.45), transparent 72%),
+      linear-gradient(165deg, var(--void-2) 0%, var(--void) 48%, oklch(12% 0.03 265) 100%);
+    color: var(--star); font-family: var(--font-sans);
+  }
+
+  /* film grain — overlay, so it reads as long-exposure sensor noise */
+  .stage::after {
+    content: ''; position: absolute; inset: 0; z-index: 40; pointer-events: none;
+    opacity: 0.2; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* atmosphere — three slow glows over a faint star field */
+  .atmos { position: absolute; inset: 0; z-index: -1; overflow: hidden; }
+  .glow {
+    position: absolute; border-radius: 50%; filter: blur(80px);
+    mix-blend-mode: screen; will-change: transform, opacity;
+    animation: gh-glow 26s ease-in-out infinite alternate;
+  }
+  .glow-a {
+    width: 34vmax; height: 30vmax; top: -14vmax; left: -12vmax;
+    background: radial-gradient(circle, oklch(55% 0.16 290 / 0.45), transparent 70%);
+  }
+  .glow-b {
+    width: 28vmax; height: 22vmax; bottom: 18%; right: -12vmax;
+    background: radial-gradient(circle, oklch(62% 0.21 350 / 0.28), transparent 72%);
+    animation-duration: 33s; animation-delay: -11s;
+  }
+  .glow-c {
+    width: 14vmax; height: 14vmax; top: 22%; right: 20%;
+    background: radial-gradient(circle, oklch(86% 0.14 82 / 0.2), transparent 74%);
+    animation-duration: 19s; animation-delay: -5s;
+  }
+  @keyframes gh-glow {
+    from { transform: translate3d(0, 0, 0) scale(0.92); opacity: 0.65; }
+    to   { transform: translate3d(1.4vmax, 1.8vmax, 0) scale(1.1); opacity: 1; }
+  }
+  .field {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(circle, oklch(96% 0.015 260 / 0.5) 0 0.8px, transparent 1.3px) 0 0 / 61px 67px,
+      radial-gradient(circle, oklch(82% 0.09 210 / 0.4) 0 0.6px, transparent 1.1px) 23px 31px / 89px 79px;
+    mask-image: linear-gradient(160deg, #000 0%, transparent 55%);
+    -webkit-mask-image: linear-gradient(160deg, #000 0%, transparent 55%);
+  }
+
+  /* masthead — a dashed orbit underline */
+  .masthead {
+    position: relative;
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 1rem; flex-wrap: wrap;
+    font-family: var(--font-mono); font-size: var(--text-xs);
+    letter-spacing: var(--tracking-wide); text-transform: uppercase;
+    color: var(--haze);
+    padding-bottom: var(--space-2);
+  }
+  .masthead::after {
+    content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
+    background: repeating-linear-gradient(90deg, var(--corona) 0 10px, transparent 10px 16px, var(--ice) 16px 18px, transparent 18px 24px);
+    opacity: 0.55;
+    mask-image: linear-gradient(90deg, #000 60%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, #000 60%, transparent);
+  }
+  .ed { display: inline-flex; align-items: center; gap: 0.6em; color: var(--star); font-weight: 700; }
+  .ed i {
+    width: 0.95em; aspect-ratio: 1; border-radius: 50%; flex: none;
+    background: var(--void);
+    box-shadow: 0 0 0 1.5px var(--corona), 0 0 10px 2px oklch(86% 0.14 82 / 0.5);
+  }
+  .ed-mid  { display: none; }
+  .ed-date {
+    color: var(--corona); font-weight: 700;
+    border: 1px solid oklch(86% 0.14 82 / 0.5);
+    padding: 0.15em 0.6em; border-radius: 4px;
+  }
+  @media (min-width: 720px) { .ed-mid { display: inline; } }
+
+  /* hero — numeral cropped by the LEFT and TOP edges; type holds the RIGHT */
+  .hero {
+    position: relative; overflow: hidden;
+    display: flex; flex-direction: column;
+    gap: clamp(1rem, 3vw, 1.8rem);
+  }
+  .huge-wrap {
+    position: relative; z-index: 0; order: -1;
+    overflow: hidden; max-width: 100%; pointer-events: none;
+    height: clamp(6.5rem, 38vw, 11rem);
+    display: flex; align-items: flex-start; justify-content: flex-start;
+  }
+  .huge-no, .huge-ghost {
+    display: block; margin-left: -0.08em; margin-top: -0.22em;
+    font-family: var(--font-sans); font-weight: 900; line-height: 0.85;
+    font-size: clamp(9rem, 56vw, 30rem); letter-spacing: -0.06em;
+    user-select: none;
+  }
+  .huge-no {
+    position: relative;
+    color: transparent;
+    -webkit-text-stroke: 2px oklch(86% 0.14 82 / 0.75);
+    background: repeating-linear-gradient(180deg, oklch(86% 0.14 82 / 0.32) 0 0.012em, transparent 0.012em 0.04em);
+    -webkit-background-clip: text; background-clip: text;
+    mask-image: linear-gradient(150deg, #000 30%, oklch(0% 0 0 / 0.4) 70%, transparent 100%);
+    -webkit-mask-image: linear-gradient(150deg, #000 30%, oklch(0% 0 0 / 0.4) 70%, transparent 100%);
+  }
+  .huge-ghost {
+    position: absolute; left: 0; top: 0;
+    color: oklch(62% 0.21 350 / 0.5);
+    mix-blend-mode: screen; filter: blur(3px);
+    mask-image: linear-gradient(90deg, #000 10%, transparent 85%);
+    -webkit-mask-image: linear-gradient(90deg, #000 10%, transparent 85%);
+    will-change: transform;
+    animation: gh-drift 12s ease-in-out infinite alternate;
+  }
+  @keyframes gh-drift {
+    from { transform: translate(0.02em, 0.02em) rotate(0.5deg); }
+    to   { transform: translate(0.07em, 0.05em) rotate(-0.8deg); }
+  }
+  .hero-text {
+    position: relative; z-index: 2;
+    max-width: min(100%, 46ch);
+    align-self: flex-end; text-align: right;
+  }
+  .stats { position: relative; z-index: 2; }
+  @media (min-width: 720px) {
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+      row-gap: clamp(1.5rem, 3.5vw, 2.6rem);
+      min-height: clamp(26rem, 46vw, 36rem);
+      align-content: end;
+    }
+    .huge-wrap {
+      position: absolute; top: 0; bottom: 0; left: 0;
+      width: 74%; height: auto;
+    }
+    .huge-no, .huge-ghost { font-size: clamp(15rem, 40vw, 30rem); margin-left: -0.1em; margin-top: -0.24em; }
+    .hero-text { grid-column: 2; justify-self: end; }
+    .stats { grid-column: 1 / -1; }
+  }
+  .kicker {
+    margin: 0 0 var(--space-2); font-family: var(--font-mono);
+    font-size: var(--text-xs); letter-spacing: var(--tracking-wide);
+    text-transform: uppercase; color: var(--ice);
+  }
+  .kicker::after {
+    content: '◐'; margin-left: 0.6em; color: var(--corona);
+  }
+  .title {
+    position: relative; display: inline-block; max-width: 100%; margin: 0;
+    font-size: clamp(3.1rem, 0.8rem + 12vw, 9rem); line-height: 0.86; font-weight: 800;
+    letter-spacing: -0.055em; color: var(--star);
+    text-shadow:
+      0.025em 0.03em 0 oklch(62% 0.21 350 / 0.55),
+      0 0 0.5em oklch(86% 0.14 82 / 0.22);
+  }
+  .title::before {
+    content: ''; position: absolute; z-index: -1;
+    width: 0.62em; aspect-ratio: 1; border-radius: 50%;
+    top: -0.2em; left: -0.32em;
+    background: var(--void);
+    box-shadow:
+      0 0 0 0.012em var(--corona),
+      0 0 0.18em 0.04em oklch(86% 0.14 82 / 0.55),
+      0 0 0.6em 0.1em oklch(68% 0.17 45 / 0.25);
+  }
+  .lede {
+    margin: calc(var(--space-3) + 0.2em) 0 0 auto; max-width: 42ch;
+    font-family: var(--font-mono); font-size: var(--text-lg);
+    line-height: 1.55; color: var(--haze);
+  }
+
+  /* stats — horizontal phase meters; the bar IS the figure */
+  .stats {
+    display: flex; flex-wrap: wrap; gap: clamp(0.5rem, 1.6vw, 0.9rem);
+    margin: 0; max-width: 100%;
+  }
+  .stat {
+    flex: 1 1 min(100%, 15rem); min-width: 0; min-height: 44px;
+    display: flex; flex-direction: column; gap: 0.35rem;
+    padding: clamp(0.7rem, 2vw, 1rem) clamp(0.8rem, 2vw, 1.1rem);
+    border-left: 2px solid var(--corona);
+    background: linear-gradient(90deg, oklch(26% 0.06 282 / 0.85), oklch(20% 0.05 280 / 0.35));
+    box-shadow: 0 18px 32px -24px oklch(6% 0.02 275 / 0.95);
+  }
+  .stat:nth-child(2) { border-left-color: var(--plasma); }
+  .stat:nth-child(3) { border-left-color: var(--ice); }
+  .stat-k {
+    margin: 0; font-size: var(--text-xl); font-weight: 800;
+    letter-spacing: -0.03em; line-height: 1; color: var(--star);
+  }
+  .stat-l {
+    margin: 0; min-width: 0;
+    font-family: var(--font-mono); font-size: var(--text-xs);
+    letter-spacing: 0.06em; text-transform: uppercase; color: var(--haze);
+  }
+  .meter {
+    position: relative; display: block; height: 6px; margin-top: 0.3rem;
+    border-radius: 999px;
+    background:
+      linear-gradient(90deg, var(--ember), var(--corona)) 0 0 / var(--pct) 100% no-repeat,
+      repeating-linear-gradient(90deg, oklch(72% 0.035 270 / 0.25) 0 1px, transparent 1px 8px);
+  }
+  .meter i {
+    position: absolute; top: 50%; left: var(--pct);
+    width: 12px; aspect-ratio: 1; border-radius: 50%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle at 70% 50%, var(--void) 0 45%, transparent 47%), var(--star);
+    box-shadow: 0 0 8px oklch(86% 0.14 82 / 0.7);
+  }
+
+  /* bento gallery — feature anchors LEFT, two stacked plates to its right,
+     the wide plate lies along the RIGHT floor */
+  .gallery {
+    display: grid; gap: clamp(0.6rem, 1.5vw, 1.1rem);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: 11rem; grid-auto-flow: dense;
+  }
+  @media (min-width: 720px) {
+    .gallery {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      grid-auto-rows: 12.5rem;
+    }
+    .plate         { grid-column: span 4; }
+    .plate.feature { grid-column: 1 / span 7; grid-row: 1 / span 2; }
+    .plate.side    { grid-column: 8 / span 5; }
+    .plate.wide    { grid-column: 5 / span 8; }
+  }
+  .plate {
+    position: relative; overflow: hidden; margin: 0;
+    border-radius: 3px;
+    border: 1px solid oklch(96% 0.015 260 / 0.08);
+    background: var(--void);
+    box-shadow: 0 26px 46px -30px oklch(4% 0.02 275 / 0.95);
+    transition: transform var(--duration) var(--ease), box-shadow var(--duration) var(--ease), border-color var(--duration) var(--ease);
+  }
+  .plate:hover {
+    transform: translateY(-3px);
+    border-color: oklch(86% 0.14 82 / 0.4);
+    box-shadow: 0 32px 56px -28px oklch(86% 0.14 82 / 0.28);
+  }
+  .art { position: absolute; inset: 0; overflow: hidden; }
+  .art::before, .art::after, .layer { content: ''; position: absolute; inset: 0; }
+  .cap {
+    position: absolute; inset: auto 0 0 0; z-index: 2;
+    display: flex; gap: var(--space-2); align-items: flex-end;
+    min-height: 3rem; padding: var(--space-2) var(--space-3);
+    background: linear-gradient(0deg,
+      oklch(12% 0.03 275 / 0.95) 0%, oklch(12% 0.03 275 / 0.6) 60%, transparent 100%);
+  }
+  .cap-tag {
+    font-family: var(--font-mono); font-weight: 700;
+    font-size: var(--text-sm); color: var(--corona);
+    min-width: 2.2em;
+  }
+  .cap-body { display: flex; flex-direction: column; min-width: 0; }
+  .cap-name { font-weight: 700; letter-spacing: -0.01em; color: var(--star); }
+  .cap-note {
+    font-style: normal; font-family: var(--font-mono);
+    font-size: var(--text-xs); color: var(--haze);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  /* ── generative artworks — on a void, light is added with screen and
+     difference; multiply only where the horizon carries daylight ── */
+
+  /* I · Korona (feature) — a crown visible only when covered */
+  .art-korona {
+    background:
+      radial-gradient(circle at 58% 44%, oklch(30% 0.08 285) 0, transparent 55%),
+      radial-gradient(circle at 12% 88%, oklch(26% 0.1 350 / 0.7) 0, transparent 40%),
+      var(--void);
+  }
+  .art-korona::before {
+    background:
+      radial-gradient(circle at 58% 44%, oklch(92% 0.1 85 / 0.75) 0 12%, oklch(68% 0.17 45 / 0.35) 20%, transparent 42%),
+      radial-gradient(circle, oklch(96% 0.015 260 / 0.55) 0 0.8px, transparent 1.3px) 0 0 / 29px 31px;
+    mix-blend-mode: screen;
+  }
+  .art-korona .layer {
+    inset: auto; left: 58%; top: 44%;
+    width: 150%; aspect-ratio: 1;
+    background:
+      repeating-conic-gradient(from 0deg, oklch(90% 0.12 85 / 0.85) 0 0.7deg, transparent 0.7deg 4.5deg),
+      repeating-conic-gradient(from 2deg, oklch(82% 0.09 210 / 0.5) 0 0.4deg, transparent 0.4deg 7deg);
+    mask-image: radial-gradient(closest-side, transparent 0 21%, #000 23%, oklch(0% 0 0 / 0.35) 40%, transparent 68%);
+    -webkit-mask-image: radial-gradient(closest-side, transparent 0 21%, #000 23%, oklch(0% 0 0 / 0.35) 40%, transparent 68%);
+    mix-blend-mode: screen; will-change: transform;
+    transform: translate(-50%, -50%);
+    animation: gh-turn 80s linear infinite;
+  }
+  @keyframes gh-turn {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to   { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+  .art-korona::after {
+    inset: auto; left: 58%; top: 44%;
+    width: 34%; aspect-ratio: 1; border-radius: 50%;
+    transform: translate(-50%, -50%);
+    background:
+      radial-gradient(circle at 86% 22%, var(--star) 0 4%, oklch(86% 0.14 82 / 0.6) 7%, transparent 12%),
+      radial-gradient(circle at 40% 40%, oklch(18% 0.04 280), oklch(10% 0.02 275) 70%);
+    box-shadow:
+      0 0 0 1px oklch(92% 0.1 85 / 0.9),
+      0 0 18px 3px oklch(86% 0.14 82 / 0.55),
+      inset 0 0 12px oklch(4% 0.02 275);
+  }
+
+  /* II · Lintasan — a road that never arrives */
+  .art-lintasan { background: radial-gradient(circle at 50% 50%, oklch(24% 0.06 280), var(--void) 75%); }
+  .art-lintasan::before {
+    inset: -30%;
+    background:
+      repeating-radial-gradient(ellipse 70% 24% at 50% 50%,
+        oklch(82% 0.09 210 / 0.4) 0 1px, transparent 1px 13px);
+    transform: rotate(-18deg);
+    mask-image: radial-gradient(ellipse 50% 40% at 50% 50%, #000 30%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse 50% 40% at 50% 50%, #000 30%, transparent 75%);
+  }
+  .art-lintasan::after {
+    background:
+      radial-gradient(circle at 74% 34%, var(--ember) 0 3.2%, oklch(68% 0.17 45 / 0.35) 4.5%, transparent 7%),
+      radial-gradient(circle at 26% 64%, var(--ice) 0 1.6%, transparent 2.2%),
+      radial-gradient(circle at 60% 72%, var(--plasma) 0 1.2%, transparent 1.8%);
+  }
+  .art-lintasan .layer {
+    background: radial-gradient(circle at 50% 46%, var(--star) 0 1.5%, oklch(86% 0.14 82 / 0.7) 3%, transparent 14%);
+    mix-blend-mode: screen;
+  }
+
+  /* III · Bayang — the umbra eats the penumbra */
+  .art-bayang { background: linear-gradient(120deg, var(--dusk), oklch(16% 0.04 280)); }
+  .art-bayang::before {
+    background: radial-gradient(circle at 38% 48%, oklch(90% 0.05 85) 0 27%, transparent 27.5%);
+  }
+  .art-bayang::after {
+    background:
+      radial-gradient(circle at 58% 52%, oklch(90% 0.05 85) 0 25%, transparent 25.5%),
+      radial-gradient(circle at 58% 52%, transparent 0 29%, oklch(82% 0.09 210 / 0.6) 29.5% 30%, transparent 30.5%);
+    mix-blend-mode: difference;
+  }
+  .art-bayang .layer {
+    background:
+      radial-gradient(circle at 48% 50%, oklch(62% 0.21 350 / 0.8) 0 9%, transparent 9.5%),
+      repeating-linear-gradient(90deg, oklch(96% 0.015 260 / 0.07) 0 1px, transparent 1px 6px);
+    mix-blend-mode: exclusion;
+  }
+
+  /* IV · Ufuk (wide) — the line where daylight gives up */
+  .art-ufuk {
+    background: linear-gradient(180deg,
+      var(--void) 0 18%, var(--dusk) 18% 34%, oklch(40% 0.14 330) 34% 46%,
+      oklch(58% 0.2 350) 46% 56%, var(--ember) 56% 64%, oklch(80% 0.14 75) 64% 70%,
+      oklch(22% 0.05 270) 70% 100%);
+  }
+  .art-ufuk::before {
+    background: radial-gradient(circle at 68% 70%, oklch(94% 0.08 85) 0 13%, oklch(86% 0.14 82 / 0.5) 15%, transparent 26%);
+    mask-image: linear-gradient(180deg, #000 70%, transparent 70%);
+    -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent 70%);
+  }
+  .art-ufuk::after {
+    background:
+      repeating-linear-gradient(0deg, oklch(12% 0.03 275 / 0.55) 0 1px, transparent 1px 5px),
+      repeating-linear-gradient(1.2deg, oklch(12% 0.03 275 / 0.55) 0 1px, transparent 1px 5px);
+    mix-blend-mode: multiply;
+    mask-image: linear-gradient(180deg, transparent 20%, #000 60%, #000 70%, transparent 71%);
+    -webkit-mask-image: linear-gradient(180deg, transparent 20%, #000 60%, #000 70%, transparent 71%);
+  }
+  .art-ufuk .layer {
+    inset: 70% 0 0 0;
+    background:
+      repeating-linear-gradient(180deg, oklch(86% 0.14 82 / 0.55) 0 1px, transparent 1px 7px);
+    mask-image: radial-gradient(ellipse 14% 100% at 68% 0%, #000 20%, transparent 100%);
+    -webkit-mask-image: radial-gradient(ellipse 14% 100% at 68% 0%, #000 20%, transparent 100%);
+    will-change: opacity;
+    animation: gh-shimmer 4s ease-in-out infinite alternate;
+  }
+  @keyframes gh-shimmer { from { opacity: 0.45; } to { opacity: 1; } }
+
+  /* V · Debu — stars that never blink together */
+  .art-debu { background: radial-gradient(ellipse at 30% 20%, oklch(22% 0.06 285), oklch(11% 0.025 270) 80%); }
+  .art-debu::before {
+    background:
+      radial-gradient(circle, var(--star) 0 1px, transparent 1.6px) 0 0 / 37px 41px,
+      radial-gradient(circle, var(--ice) 0 0.7px, transparent 1.2px) 11px 7px / 23px 19px,
+      radial-gradient(circle, oklch(86% 0.14 82 / 0.9) 0 1.4px, transparent 2px) 29px 3px / 71px 53px;
+  }
+  .art-debu::after {
+    background: linear-gradient(125deg, transparent 28%, oklch(82% 0.09 210 / 0.16) 44%, oklch(62% 0.21 350 / 0.14) 56%, transparent 72%);
+    filter: blur(6px); mix-blend-mode: screen;
+  }
+  .art-debu .layer {
+    background:
+      radial-gradient(circle, var(--star) 0 1.6px, oklch(96% 0.015 260 / 0.3) 2.4px, transparent 4px) 17px 21px / 59px 47px;
+    will-change: opacity;
+    animation: gh-twinkle 3.2s ease-in-out infinite alternate;
+  }
+  @keyframes gh-twinkle { from { opacity: 0.15; } to { opacity: 1; } }
+
+  /* VI · Fase — moons thinning one by one (tile-size drift moiré) */
+  .art-fase { background: oklch(13% 0.03 272); }
+  .art-fase::before {
+    background: radial-gradient(circle 14px at 50% 50%, oklch(92% 0.04 90) 0 97%, transparent 100%) 0 0 / 40px 40px;
+  }
+  .art-fase::after {
+    background: radial-gradient(circle 14px at 50% 50%, oklch(13% 0.03 272) 0 97%, transparent 100%) 0 0 / 43px 42px;
+  }
+  .art-fase .layer {
+    background:
+      radial-gradient(ellipse at 50% 50%, transparent 30%, oklch(13% 0.03 272 / 0.85) 85%),
+      linear-gradient(180deg, transparent 0 49.6%, oklch(82% 0.09 210 / 0.35) 49.6% 50.2%, transparent 50.2%);
+  }
+
+  /* VII · Kutub — curtains blown by the solar wind */
+  .art-kutub { background: linear-gradient(180deg, oklch(12% 0.03 265), oklch(20% 0.05 250) 100%); }
+  .art-kutub::before {
+    background:
+      linear-gradient(180deg, oklch(80% 0.17 160 / 0) 10%, oklch(80% 0.17 160 / 0.6) 45%, oklch(62% 0.21 350 / 0.5) 75%, transparent 92%);
+    mask-image: radial-gradient(ellipse 70% 50% at 45% 55%, #000 20%, transparent 80%);
+    -webkit-mask-image: radial-gradient(ellipse 70% 50% at 45% 55%, #000 20%, transparent 80%);
+    filter: blur(10px); mix-blend-mode: screen;
+  }
+  .art-kutub .layer {
+    inset: 0 -30%;
+    background: repeating-linear-gradient(90deg,
+      oklch(88% 0.12 170 / 0.55) 0 1px, transparent 1px 5px, oklch(82% 0.09 210 / 0.3) 5px 6px, transparent 6px 13px);
+    mask-image: linear-gradient(180deg, transparent 12%, #000 40%, oklch(0% 0 0 / 0.4) 70%, transparent 88%);
+    -webkit-mask-image: linear-gradient(180deg, transparent 12%, #000 40%, oklch(0% 0 0 / 0.4) 70%, transparent 88%);
+    mix-blend-mode: screen; will-change: transform;
+    animation: gh-sway 14s ease-in-out infinite alternate;
+  }
+  @keyframes gh-sway {
+    from { transform: skewX(-16deg) translate3d(-6%, 0, 0); }
+    to   { transform: skewX(12deg) translate3d(6%, 0, 0); }
+  }
+  .art-kutub::after {
+    inset: 76% 0 0 0;
+    background: linear-gradient(170deg, oklch(10% 0.02 265), oklch(16% 0.03 260));
+    clip-path: polygon(0 40%, 18% 10%, 34% 36%, 52% 0, 70% 30%, 86% 14%, 100% 34%, 100% 100%, 0 100%);
+  }
+
+  /* VIII · Prisma — one ray, seven confessions */
+  .art-prisma { background: linear-gradient(200deg, var(--dusk), oklch(12% 0.03 275)); }
+  .art-prisma .layer {
+    background: linear-gradient(170deg, transparent 0 46%, var(--star) 47% 48.5%, transparent 49.5%);
+    clip-path: polygon(0 0, 46% 0, 46% 100%, 0 100%);
+    filter: drop-shadow(0 0 4px oklch(96% 0.015 260 / 0.7));
+  }
+  .art-prisma::after {
+    background: conic-gradient(from 72deg at 46% 46%,
+      transparent 0 8deg,
+      oklch(62% 0.21 350 / 0.85) 8deg 14deg, oklch(68% 0.17 45 / 0.85) 14deg 20deg,
+      oklch(86% 0.14 82 / 0.85) 20deg 26deg, oklch(78% 0.17 150 / 0.85) 26deg 32deg,
+      oklch(82% 0.09 210 / 0.85) 32deg 38deg, oklch(55% 0.18 270 / 0.85) 38deg 44deg,
+      transparent 44deg);
+    clip-path: polygon(46% 0, 100% 0, 100% 100%, 46% 100%);
+    mix-blend-mode: screen;
+  }
+  .art-prisma::before {
+    z-index: 1;
+    background: linear-gradient(140deg, oklch(96% 0.015 260 / 0.55), oklch(72% 0.035 270 / 0.15) 60%, oklch(96% 0.015 260 / 0.35));
+    clip-path: polygon(46% 14%, 68% 62%, 26% 62%);
+    mix-blend-mode: screen;
+  }
+
+  /* marquee — running LEFTWARD between two corona hairlines */
+  .marquee {
+    position: relative;
+    overflow: hidden; max-width: calc(100% + var(--pad) * 2);
+    margin-inline: calc(var(--pad) * -1);
+    padding-block: var(--space-2);
+    border-block: 1px solid oklch(86% 0.14 82 / 0.45);
+    background:
+      repeating-linear-gradient(90deg, oklch(96% 0.015 260 / 0.04) 0 1px, transparent 1px 14px),
+      linear-gradient(90deg, oklch(26% 0.08 290), var(--void) 50%, oklch(26% 0.1 350));
+  }
+  .marquee-track {
+    display: flex; gap: clamp(1.5rem, 5vw, 4rem); width: max-content;
+    animation: gh-run 60s linear infinite; will-change: transform;
+  }
+  .gl { font-size: var(--text-xl); line-height: 1.2; color: var(--star); font-family: var(--font-mono); }
+  .gl:nth-child(3n) { color: var(--corona); }
+  .gl:nth-child(4n) { color: var(--plasma); }
+  @keyframes gh-run { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+  /* colophon */
+  .colophon {
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 0.5rem;
+    font-family: var(--font-mono); font-size: var(--text-xs);
+    letter-spacing: 0.06em; color: var(--haze);
+    border-top: 1px solid oklch(96% 0.015 260 / 0.1);
+    padding-top: var(--space-2); padding-bottom: var(--space-3);
+  }
+  .pulse { display: inline-flex; align-items: center; gap: 0.5rem; }
+  .pulse i {
+    width: 9px; height: 9px; border-radius: 50%; flex: none;
+    background: var(--void);
+    box-shadow: 0 0 0 1.5px var(--accent), 0 0 8px 1px oklch(58% 0.16 38 / 0.6);
+    animation: gh-bob 4.5s ease-in-out infinite;
+  }
+  @keyframes gh-bob { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.45; transform: scale(0.75); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stage *, .stage *::before, .stage *::after { animation: none !important; }
+    .plate { transition: none; }
+  }
+</style>
