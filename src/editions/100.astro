@@ -1,0 +1,687 @@
+---
+/*
+ * DailyShowcase — the AI-owned canvas.
+ * Rewritten in full by Claude once per day (scripts/regen.sh).
+ * Contract: self-contained Astro component (frontmatter + markup + scoped <style>).
+ * No imports, no network (no fonts/images/CDN/fetch), no client JS beyond tiny
+ * compositor-only motion. Must compile with `astro build`. SEO <head> lives in
+ * Base.astro — leave it alone. Reuse tokens from src/styles/tokens.css.
+ * The frontmatter is the only state carried across days.
+ *
+ * Quality bar (keep it RICH, not bare): layered hero with weight, a bento gallery
+ * where EACH plate is a real generative-CSS artwork, grain texture, a moving
+ * marquee, intentional asymmetry. Avoid a plain centered-headline page.
+ *
+ * Edition 100 — the hundredth — walks out of the eclipse and into the loom.
+ * 099 (GERHANA) was cobalt night with a saffron corona; 100 is ANYAMAN — a LIGHT
+ * ground for the first time in a while: raw undyed linen (h≈85, L≈94%), threaded
+ * with indigo vat-dye (h≈270), madder root red (h≈28), moss (h≈135) and a soot
+ * charcoal for ink. The --accent token appears as a single knotted thread.
+ * Composition flips again: the title sits TOP-LEFT and hard left-aligned, the
+ * numeral "100" is filled with woven stripes and bleeds off the RIGHT/BOTTOM,
+ * and the stats run as a horizontal tally under the title. Gallery: a woven
+ * FEATURE on the LEFT for two rows, two regulars stacked right, a TALL hanging
+ * warp on the LEFT of rows 3–4, a wide zigzag beside it, two regulars under,
+ * then a fringe + spool pair closing the wall. The marquee drifts RIGHTWARD on
+ * a running-stitch rule.
+ * Techniques: conic-checker-masked plain weave, crossed-band diamond ikat with
+ * blurred bleed, difference-blended ring interference, swaying skewed warp,
+ * four-gradient chevron zigzag with multiply bands, multiply dye mesh with
+ * tide-mark rings, running + cross stitch in clip-path, clip-path spool wraps,
+ * and a zigzag-clipped fringe.
+ */
+const edition = {
+  no: 100,
+  date: '2026-10-20',
+  title: 'Anyaman',
+  kicker: 'Pameran harian / tentang benang yang saling menahan',
+  subtitle:
+    'Seratus helai tidak pernah menjadi kain — sampai satu benang memutuskan untuk lewat di bawah, lalu di atas, lalu di bawah lagi.',
+};
+
+const stats = [
+  { k: '100', label: 'edisi, ditenun satu helai per hari' },
+  { k: '1 : 1', label: 'lungsin dan pakan — atas, bawah, atas' },
+  { k: '0', label: 'simpul yang benar-benar dimatikan' },
+];
+
+const plates = [
+  { id: 'lungsin', tag: '01', name: 'Lungsin',  note: 'checker mask · tenunan polos yang perlahan terurai',  size: 'feature' },
+  { id: 'ikat',    tag: '02', name: 'Ikat',     note: 'crossed bands · belah ketupat yang warnanya merembes', size: '' },
+  { id: 'simpul',  tag: '03', name: 'Simpul',   note: 'difference rings · dua pusaran yang saling mengikat',  size: '' },
+  { id: 'benang',  tag: '04', name: 'Benang',   note: 'skewed warp · helai yang masih berayun di alat tenun', size: 'tall' },
+  { id: 'tenun',   tag: '05', name: 'Tenun',    note: 'zigzag tiles · gunung kecil yang diulang sampai jauh', size: 'wide' },
+  { id: 'celup',   tag: '06', name: 'Celup',    note: 'multiply mesh · pewarna yang meninggalkan garis pasang', size: '' },
+  { id: 'jahit',   tag: '07', name: 'Jahit',    note: 'dashed rows · jejak jarum yang tidak pernah lurus',     size: '' },
+  { id: 'rumbai',  tag: '08', name: 'Rumbai',   note: 'clipped fringe · ujung kain yang dibiarkan bebas',      size: 'wide' },
+  { id: 'kelos',   tag: '09', name: 'Kelos',    note: 'wrapped spool · semua yang belum ditenun, menunggu',    size: '' },
+];
+
+const glyphs = ['╳', '◇', '┼', '≋', '◆', '⋈', '║', '✕', '⌗', '═', '⧉', '⊞'];
+const marquee = [...glyphs, ...glyphs];
+const numeral = String(edition.no);
+const edNo = String(edition.no).padStart(3, '0');
+---
+
+<section class="stage" aria-label={`Pameran visual abstrak — ${edition.title}`}>
+  <div class="cloth" aria-hidden="true">
+    <span class="dye dye-a"></span>
+    <span class="dye dye-b"></span>
+    <span class="selvedge"></span>
+  </div>
+
+  <header class="masthead">
+    <span class="ed"><i class="knot" aria-hidden="true"></i>Edisi {edNo}</span>
+    <span class="ed-mid">{edition.kicker}</span>
+    <span class="ed-date">{edition.date}</span>
+  </header>
+
+  <div class="hero">
+    <div class="hero-text">
+      <p class="kicker">Spesimen harian · edisi keseratus · ditenun di atas linen mentah</p>
+      <h1 class="title">{edition.title}<span class="title-thread" aria-hidden="true"></span></h1>
+      <p class="lede">{edition.subtitle}</p>
+    </div>
+    <dl class="stats" aria-label="Hitungan helai">
+      {stats.map((s, i) => (
+        <div class="stat">
+          <dt class="stat-k">{s.k}</dt>
+          <dd class="stat-l"><span class="stat-i" aria-hidden="true">{['i', 'ii', 'iii'][i]} ·</span> {s.label}</dd>
+        </div>
+      ))}
+    </dl>
+    <div class="huge-wrap" aria-hidden="true">
+      <span class="huge huge-shadow">{numeral}</span>
+      <span class="huge huge-no">{numeral}</span>
+    </div>
+  </div>
+
+  <section class="gallery" aria-label="Contoh kain">
+    {plates.map((p) => (
+      <figure class={`plate ${p.size} plate-${p.id}`} aria-label={`${p.name} — ${p.note}`}>
+        <span class={`art art-${p.id}`} aria-hidden="true"><i class="layer"></i><i class="glint"></i></span>
+        <figcaption class="cap">
+          <span class="cap-tag">{p.tag}</span>
+          <span class="cap-body">
+            <b class="cap-name">{p.name}</b>
+            <i class="cap-note">{p.note}</i>
+          </span>
+        </figcaption>
+      </figure>
+    ))}
+  </section>
+
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track">
+      {marquee.map((g) => <span class="gl">{g}</span>)}
+    </div>
+  </div>
+
+  <footer class="colophon">
+    <span class="pulse"><i class="knot" aria-hidden="true"></i> kain hanyalah kesepakatan panjang antara yang tegak dan yang melintang</span>
+    <span>Edisi {edNo} · {edition.title} · CSS murni · tanpa aset eksternal</span>
+  </footer>
+</section>
+
+<style>
+  /* raw linen, indigo vat, madder root, moss — one accent thread knotted through */
+  .stage {
+    --pad: clamp(1.1rem, 4vw, 3rem);
+    --linen: oklch(94% 0.022 85);
+    --linen-deep: oklch(88% 0.03 80);
+    --flax: oklch(80% 0.04 78);
+    --soot: oklch(24% 0.015 60);
+    --soot-soft: oklch(42% 0.02 65);
+    --indigo: oklch(36% 0.11 270);
+    --indigo-deep: oklch(26% 0.09 272);
+    --indigo-pale: oklch(70% 0.07 265);
+    --madder: oklch(52% 0.16 28);
+    --madder-pale: oklch(76% 0.08 30);
+    --moss: oklch(56% 0.09 135);
+    --moss-deep: oklch(40% 0.07 140);
+    --thread: var(--accent);
+
+    position: relative; isolation: isolate; overflow: hidden;
+    display: flex; flex-direction: column; gap: clamp(2rem, 5vw, 4.5rem);
+    padding: var(--pad);
+    border-radius: var(--radius);
+    background:
+      radial-gradient(ellipse 60% 45% at 100% 0%, oklch(70% 0.07 265 / 0.22), transparent 70%),
+      radial-gradient(ellipse 55% 40% at 0% 100%, oklch(76% 0.08 30 / 0.25), transparent 70%),
+      linear-gradient(175deg, var(--linen) 0%, var(--linen-deep) 100%);
+    color: var(--soot); font-family: var(--font-sans);
+  }
+
+  /* film grain — multiplied, so it reads as slub in the linen */
+  .stage::after {
+    content: ''; position: absolute; inset: 0; z-index: 40; pointer-events: none;
+    opacity: 0.16; mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* the knot motif — a little crossed thread */
+  .knot {
+    display: inline-block; flex: none; position: relative;
+    width: 0.9em; aspect-ratio: 1; border-radius: 50%;
+    background:
+      linear-gradient(45deg, transparent 42%, var(--thread) 42% 58%, transparent 58%),
+      linear-gradient(-45deg, transparent 42%, var(--indigo) 42% 58%, transparent 58%);
+    box-shadow: 0 0 0 1.5px var(--soot) inset;
+  }
+
+  /* cloth — two slow dye pools and a selvedge edge */
+  .cloth { position: absolute; inset: 0; z-index: -1; overflow: hidden; }
+  .dye {
+    position: absolute; border-radius: 46% 54% 60% 40% / 50% 42% 58% 50%;
+    filter: blur(50px);
+    will-change: transform, opacity;
+    animation: an-soak 26s ease-in-out infinite alternate;
+  }
+  .dye-a {
+    width: 46vmax; height: 30vmax; top: 30%; right: -18vmax;
+    background: radial-gradient(ellipse, oklch(36% 0.11 270 / 0.2), transparent 65%);
+  }
+  .dye-b {
+    width: 36vmax; height: 26vmax; top: -8vmax; left: -14vmax;
+    background: radial-gradient(ellipse, oklch(56% 0.09 135 / 0.2), transparent 65%);
+    animation-duration: 34s; animation-delay: -12s;
+  }
+  @keyframes an-soak {
+    from { transform: translate3d(0, 0, 0) rotate(0deg) scale(0.94); opacity: 0.6; }
+    to   { transform: translate3d(4vmax, -3vmax, 0) rotate(18deg) scale(1.08); opacity: 1; }
+  }
+  .selvedge {
+    position: absolute; top: 0; bottom: 0; left: 0; width: 6px;
+    background: repeating-linear-gradient(180deg, var(--indigo) 0 6px, var(--linen) 6px 9px, var(--madder) 9px 12px, var(--linen) 12px 15px);
+    opacity: 0.75;
+  }
+
+  /* masthead — a running-stitch rule */
+  .masthead {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 0.6rem 1rem; flex-wrap: wrap;
+    font-family: var(--font-mono); font-size: var(--text-xs);
+    letter-spacing: var(--tracking-wide); text-transform: uppercase;
+    color: var(--soot-soft);
+    padding-bottom: var(--space-2);
+    background: repeating-linear-gradient(90deg, var(--soot) 0 10px, transparent 10px 16px) 0 100% / 100% 2px no-repeat;
+  }
+  .ed { display: inline-flex; align-items: center; gap: 0.6em; color: var(--soot); font-weight: 700; }
+  .ed-mid { display: none; color: var(--indigo); }
+  .ed-date {
+    color: var(--linen); font-weight: 700;
+    padding: 0.3em 0.8em; border-radius: 3px;
+    background: var(--indigo);
+    box-shadow: 3px 3px 0 var(--madder);
+  }
+  @media (min-width: 720px) { .ed-mid { display: inline; } }
+
+  /* hero — title TOP-LEFT, tally under it, woven numeral bleeding RIGHT/BOTTOM */
+  .hero {
+    position: relative; overflow: hidden;
+    display: flex; flex-direction: column;
+    gap: clamp(1.4rem, 3vw, 2.2rem);
+  }
+  .hero-text { position: relative; z-index: 2; max-width: 100%; }
+  .stats { position: relative; z-index: 2; }
+  .huge-wrap {
+    position: relative; z-index: 0;
+    overflow: hidden; max-width: 100%; pointer-events: none;
+    height: clamp(8rem, 44vw, 14rem);
+  }
+  .huge {
+    position: absolute; right: -0.06em; bottom: -0.16em;
+    font-family: var(--font-sans); font-weight: 900; line-height: 0.85;
+    font-size: clamp(8rem, 46vw, 20rem); letter-spacing: -0.08em;
+    user-select: none; white-space: nowrap;
+  }
+  .huge-no {
+    color: transparent;
+    background:
+      repeating-linear-gradient(90deg, oklch(36% 0.11 270 / 0.0) 0 6px, oklch(94% 0.022 85 / 0.35) 6px 8px),
+      repeating-linear-gradient(0deg,
+        var(--indigo) 0 9px, var(--indigo-deep) 9px 12px,
+        var(--madder) 12px 15px, var(--indigo) 15px 30px,
+        var(--moss) 30px 33px, var(--indigo-deep) 33px 42px);
+    -webkit-background-clip: text; background-clip: text;
+  }
+  .huge-shadow {
+    color: transparent;
+    -webkit-text-stroke: 2px var(--madder);
+    opacity: 0.7;
+    will-change: transform;
+    animation: an-shift 9s ease-in-out infinite alternate;
+  }
+  @keyframes an-shift {
+    from { transform: translate3d(-0.04em, -0.03em, 0); }
+    to   { transform: translate3d(-0.015em, -0.01em, 0); }
+  }
+
+  @media (min-width: 720px) {
+    .hero {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      grid-template-rows: auto 1fr auto;
+      column-gap: clamp(1rem, 3vw, 2rem); row-gap: clamp(1.5rem, 3vw, 2.5rem);
+      min-height: clamp(32rem, 54vw, 42rem);
+    }
+    .hero-text { grid-column: 1 / span 8; grid-row: 1; }
+    .stats { grid-column: 1 / span 8; grid-row: 3; align-self: end; }
+    .huge-wrap {
+      position: absolute; right: 0; bottom: 0;
+      width: 70%; height: 100%;
+    }
+    .huge { font-size: clamp(16rem, 36vw, 30rem); }
+  }
+
+  .kicker {
+    margin: 0 0 var(--space-2); font-family: var(--font-mono);
+    font-size: var(--text-xs); letter-spacing: var(--tracking-wide);
+    text-transform: uppercase; color: var(--madder);
+  }
+  .title {
+    position: relative; display: inline-block; max-width: 100%; margin: 0;
+    font-size: clamp(3rem, 0.4rem + 13vw, 10rem); line-height: 0.86; font-weight: 900;
+    letter-spacing: -0.06em; color: var(--soot);
+    overflow-wrap: anywhere;
+  }
+  /* a single accent thread pulled under the title, knotted at the end */
+  .title-thread {
+    position: absolute; left: 0; right: -0.2em; bottom: -0.08em; height: 0.06em;
+    background: repeating-linear-gradient(90deg, var(--thread) 0 0.32em, transparent 0.32em 0.44em);
+    pointer-events: none;
+  }
+  .title-thread::after {
+    content: ''; position: absolute; right: 0; top: 50%;
+    width: 0.16em; aspect-ratio: 1; border-radius: 50%;
+    transform: translateY(-50%);
+    background: var(--thread);
+    box-shadow: 0 0 0 0.03em var(--linen), 0 0 0 0.05em var(--thread);
+  }
+  .lede {
+    margin: var(--space-4) 0 0; max-width: 42ch;
+    font-family: var(--font-mono); font-size: var(--text-base);
+    line-height: 1.65; color: var(--soot-soft);
+    padding-left: var(--space-2);
+    border-left: 3px solid var(--indigo);
+  }
+  @media (min-width: 720px) { .lede { font-size: var(--text-lg); } }
+
+  /* stats — a horizontal tally, each count a loose card pinned to the linen */
+  .stats {
+    display: flex; flex-wrap: wrap;
+    gap: clamp(0.5rem, 1.5vw, 0.9rem);
+    margin: 0; max-width: 100%;
+  }
+  .stat {
+    flex: 1 1 9rem; min-width: 0; min-height: 44px;
+    display: flex; flex-direction: column; gap: 0.35rem;
+    padding: clamp(0.75rem, 2vw, 1rem) clamp(0.85rem, 2vw, 1.15rem);
+    background: oklch(98% 0.012 85 / 0.7);
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    border: 1px solid oklch(24% 0.015 60 / 0.16);
+    border-top: 3px solid var(--indigo);
+    border-radius: 3px;
+    box-shadow: var(--shadow);
+  }
+  .stat:nth-child(2) { border-top-color: var(--madder); }
+  .stat:nth-child(3) { border-top-color: var(--moss); }
+  .stat-k {
+    margin: 0; font-size: clamp(1.5rem, 1rem + 1.6vw, 2.3rem); font-weight: 800;
+    letter-spacing: -0.04em; line-height: 1; color: var(--indigo);
+    overflow-wrap: anywhere;
+  }
+  .stat:nth-child(2) .stat-k { color: var(--madder); }
+  .stat:nth-child(3) .stat-k { color: var(--moss-deep); }
+  .stat-l {
+    margin: 0; min-width: 0;
+    font-family: var(--font-mono); font-size: var(--text-xs);
+    letter-spacing: 0.05em; text-transform: uppercase; color: var(--soot-soft);
+  }
+  .stat-i { color: var(--soot); font-weight: 700; }
+
+  /* bento gallery — FEATURE left, regulars right, TALL warp left, fringe + spool */
+  .gallery {
+    display: grid; gap: clamp(0.6rem, 1.5vw, 1rem);
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: 13.5rem;
+  }
+  @media (min-width: 480px) {
+    .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 12rem; }
+  }
+  @media (min-width: 720px) {
+    .gallery {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      grid-auto-rows: 12.5rem;
+    }
+    .plate-lungsin { grid-column: 1 / span 7;  grid-row: 1 / span 2; }
+    .plate-ikat    { grid-column: 8 / -1;      grid-row: 1; }
+    .plate-simpul  { grid-column: 8 / -1;      grid-row: 2; }
+    .plate-benang  { grid-column: 1 / span 3;  grid-row: 3 / span 2; }
+    .plate-tenun   { grid-column: 4 / -1;      grid-row: 3; }
+    .plate-celup   { grid-column: 4 / span 5;  grid-row: 4; }
+    .plate-jahit   { grid-column: 9 / -1;      grid-row: 4; }
+    .plate-rumbai  { grid-column: 1 / span 8;  grid-row: 5; }
+    .plate-kelos   { grid-column: 9 / -1;      grid-row: 5; }
+  }
+  .plate {
+    position: relative; overflow: hidden; margin: 0;
+    border-radius: 4px;
+    border: 1px solid oklch(24% 0.015 60 / 0.18);
+    background: var(--linen);
+    box-shadow: 0 1px 0 oklch(100% 0 0 / 0.6) inset, 0 22px 36px -26px oklch(24% 0.015 60 / 0.55);
+    transition: transform var(--duration) var(--ease), box-shadow var(--duration) var(--ease);
+  }
+  .plate:hover {
+    transform: translateY(-3px) rotate(-0.3deg);
+    box-shadow: 0 1px 0 oklch(100% 0 0 / 0.6) inset, 0 30px 44px -26px oklch(24% 0.015 60 / 0.7);
+  }
+  .art { position: absolute; inset: 0; overflow: hidden; }
+  .art::before, .art::after, .layer, .glint { content: ''; position: absolute; inset: 0; }
+  .cap {
+    position: absolute; inset: auto var(--space-1) var(--space-1) var(--space-1); z-index: 2;
+    display: flex; gap: var(--space-2); align-items: center;
+    min-height: 3rem; padding: 0.5rem var(--space-2);
+    background: oklch(97% 0.015 85 / 0.88);
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+    border: 1px solid oklch(24% 0.015 60 / 0.14);
+    border-radius: 3px;
+  }
+  .cap-tag {
+    flex: none; display: grid; place-items: center;
+    width: 2em; aspect-ratio: 1; border-radius: 50%;
+    font-family: var(--font-mono); font-weight: 700;
+    font-size: var(--text-xs); color: var(--linen);
+    background: var(--soot);
+  }
+  .plate:nth-child(3n + 2) .cap-tag { background: var(--indigo); }
+  .plate:nth-child(3n) .cap-tag { background: var(--madder); }
+  .cap-body { display: flex; flex-direction: column; min-width: 0; }
+  .cap-name { font-weight: 800; letter-spacing: -0.01em; color: var(--soot); }
+  .cap-note {
+    font-style: normal; font-family: var(--font-mono);
+    font-size: var(--text-xs); color: var(--soot-soft);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  /* ── generative textiles — everything here is over, under, over ── */
+
+  /* 01 · Lungsin (feature) — plain weave via a conic checker mask, unravelling */
+  .art-lungsin { background: var(--linen); }
+  .art-lungsin .layer {
+    mask-image: radial-gradient(ellipse 62% 58% at 46% 44%, #000 55%, transparent 78%);
+    -webkit-mask-image: radial-gradient(ellipse 62% 58% at 46% 44%, #000 55%, transparent 78%);
+  }
+  .art-lungsin .layer::before, .art-lungsin .layer::after {
+    content: ''; position: absolute; inset: 0;
+  }
+  .art-lungsin .layer::before {
+    /* weft — horizontal madder picks with a moss band every so often */
+    background:
+      repeating-linear-gradient(0deg,
+        var(--madder) 0 10px, oklch(40% 0.13 28) 10px 12px,
+        var(--madder) 12px 22px, oklch(40% 0.13 28) 22px 24px,
+        var(--moss) 24px 34px, var(--moss-deep) 34px 36px,
+        var(--madder) 36px 46px, oklch(40% 0.13 28) 46px 48px);
+  }
+  .art-lungsin .layer::after {
+    /* warp — vertical indigo ends, shown only where they pass OVER */
+    background:
+      linear-gradient(90deg, oklch(100% 0 0 / 0.16), transparent 50%, oklch(0% 0 0 / 0.2)) 0 0 / 12px 12px,
+      repeating-linear-gradient(90deg, var(--indigo) 0 10px, var(--indigo-deep) 10px 12px);
+    mask-image: conic-gradient(#000 25%, transparent 0 50%, #000 0 75%, transparent 0);
+    -webkit-mask-image: conic-gradient(#000 25%, transparent 0 50%, #000 0 75%, transparent 0);
+    mask-size: 24px 24px; -webkit-mask-size: 24px 24px;
+  }
+  .art-lungsin::after {
+    /* loose ends escaping the edge of the weave */
+    z-index: 1;
+    background:
+      repeating-linear-gradient(90deg, transparent 0 22px, oklch(36% 0.11 270 / 0.75) 22px 24px, transparent 24px 36px),
+      repeating-linear-gradient(0deg, transparent 0 30px, oklch(52% 0.16 28 / 0.6) 30px 32px, transparent 32px 48px);
+    mask-image: radial-gradient(ellipse 62% 58% at 46% 44%, transparent 64%, #000 74%, transparent 96%);
+    -webkit-mask-image: radial-gradient(ellipse 62% 58% at 46% 44%, transparent 64%, #000 74%, transparent 96%);
+  }
+  .art-lungsin .glint {
+    /* a slow sheen crossing the cloth */
+    z-index: 1; inset: -20% -60%;
+    background: linear-gradient(105deg, transparent 40%, oklch(100% 0 0 / 0.28) 48%, transparent 56%);
+    mix-blend-mode: soft-light;
+    will-change: transform;
+    animation: an-sheen 11s var(--ease) infinite;
+  }
+  @keyframes an-sheen {
+    0%   { transform: translate3d(-30%, 0, 0); }
+    60%, 100% { transform: translate3d(30%, 0, 0); }
+  }
+
+  /* 02 · Ikat — diamonds from two crossed bands, edges bleeding */
+  .art-ikat { background: var(--indigo-deep); }
+  .art-ikat::before {
+    background: linear-gradient(45deg, transparent 30%, var(--madder-pale) 30% 70%, transparent 70%) 0 0 / 48px 64px;
+    mask-image: linear-gradient(-45deg, transparent 30%, #000 30% 70%, transparent 70%);
+    -webkit-mask-image: linear-gradient(-45deg, transparent 30%, #000 30% 70%, transparent 70%);
+    mask-size: 48px 64px; -webkit-mask-size: 48px 64px;
+    filter: blur(1.2px);
+  }
+  .art-ikat::after {
+    /* inner diamond eye */
+    background: radial-gradient(circle, var(--linen) 0 2.5px, transparent 3px) 0 0 / 48px 64px;
+  }
+  .art-ikat .layer {
+    /* the bleed — resist-tied rows slipping sideways */
+    background: repeating-linear-gradient(0deg, transparent 0 7px, oklch(26% 0.09 272 / 0.55) 7px 9px, transparent 9px 16px);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 70%, 4% 66%, 0 62%, 0 30%, 6% 26%, 0 22%);
+  }
+  .art-ikat .glint {
+    background: linear-gradient(90deg, oklch(26% 0.09 272 / 0.7), transparent 25% 75%, oklch(26% 0.09 272 / 0.7));
+  }
+
+  /* 03 · Simpul — two ring fields, difference-blended into a knot */
+  .art-simpul { background: var(--linen); }
+  .art-simpul::before {
+    background: repeating-radial-gradient(circle at 36% 48%, var(--indigo) 0 6px, transparent 6px 13px);
+  }
+  .art-simpul::after {
+    background: repeating-radial-gradient(circle at 66% 44%, oklch(76% 0.08 30) 0 6px, transparent 6px 13px);
+    mix-blend-mode: difference;
+  }
+  .art-simpul .layer {
+    background: radial-gradient(circle at 51% 46%, var(--thread) 0 5%, transparent 5.5%);
+    box-shadow: inset 0 0 50px oklch(24% 0.015 60 / 0.35);
+  }
+
+  /* 04 · Benang (tall) — a hanging warp, swaying from the beam */
+  .art-benang {
+    background: linear-gradient(180deg, var(--soot) 0 9%, var(--linen-deep) 9%);
+  }
+  .art-benang::before {
+    top: 9%;
+    background:
+      repeating-linear-gradient(90deg,
+        var(--indigo) 0 3px, transparent 3px 7px,
+        var(--madder) 7px 9px, transparent 9px 12px,
+        var(--indigo-deep) 12px 15px, transparent 15px 19px,
+        var(--moss) 19px 21px, transparent 21px 26px);
+    mask-image: linear-gradient(180deg, #000 55%, transparent 96%);
+    -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent 96%);
+    transform-origin: 50% 0;
+    will-change: transform;
+    animation: an-sway 7s ease-in-out infinite alternate;
+  }
+  @keyframes an-sway {
+    from { transform: skewX(-3deg); }
+    to   { transform: skewX(3deg); }
+  }
+  .art-benang::after {
+    /* the beam's pegs */
+    bottom: auto; height: 9%;
+    background: radial-gradient(circle, var(--flax) 0 3px, transparent 3.5px) 0 50% / 18px 100%;
+  }
+  .art-benang .layer {
+    /* a woven heading band tied across the warp */
+    top: 30%; bottom: auto; height: 12%;
+    background:
+      repeating-linear-gradient(0deg, var(--linen) 0 2px, var(--flax) 2px 4px);
+    box-shadow: 0 6px 10px -6px oklch(24% 0.015 60 / 0.5);
+  }
+
+  /* 05 · Tenun (wide) — four-gradient chevron, colour bands multiplied over */
+  .art-tenun {
+    background:
+      linear-gradient(135deg, var(--indigo) 25%, transparent 25%) -18px 0 / 36px 36px,
+      linear-gradient(225deg, var(--indigo) 25%, transparent 25%) -18px 0 / 36px 36px,
+      linear-gradient(315deg, var(--indigo) 25%, transparent 25%) 0 0 / 36px 36px,
+      linear-gradient(45deg, var(--indigo) 25%, transparent 25%) 0 0 / 36px 36px,
+      var(--linen);
+  }
+  .art-tenun::before {
+    background: linear-gradient(180deg,
+      transparent 0 18%, var(--madder-pale) 18% 36%, transparent 36% 54%,
+      oklch(80% 0.07 135) 54% 64%, transparent 64% 82%, var(--madder-pale) 82%);
+    mix-blend-mode: multiply;
+  }
+  .art-tenun::after {
+    /* a supplementary-weft lozenge floating across the middle */
+    background: repeating-linear-gradient(0deg, var(--linen) 0 2px, var(--thread) 2px 4px);
+    clip-path: polygon(50% 18%, 66% 50%, 50% 82%, 34% 50%);
+  }
+  .art-tenun .glint {
+    background: radial-gradient(ellipse 70% 90% at 50% 50%, transparent 50%, oklch(24% 0.015 60 / 0.35));
+  }
+
+  /* 06 · Celup — a dye-bath mesh with tide-mark rings */
+  .art-celup {
+    background:
+      radial-gradient(circle at 30% 40%, oklch(36% 0.11 270 / 0.85), transparent 42%),
+      radial-gradient(circle at 72% 62%, oklch(52% 0.16 28 / 0.75), transparent 40%),
+      radial-gradient(circle at 60% 18%, oklch(56% 0.09 135 / 0.6), transparent 34%),
+      var(--linen);
+  }
+  .art-celup::before {
+    background:
+      radial-gradient(circle at 44% 52%, oklch(70% 0.07 265 / 0.9), transparent 38%),
+      radial-gradient(circle at 20% 80%, oklch(76% 0.08 30 / 0.9), transparent 30%);
+    mix-blend-mode: multiply;
+    filter: blur(8px);
+  }
+  .art-celup::after {
+    background:
+      repeating-radial-gradient(circle at 30% 40%, transparent 0 18px, oklch(26% 0.09 272 / 0.35) 18px 19px),
+      repeating-radial-gradient(circle at 72% 62%, transparent 0 14px, oklch(40% 0.13 28 / 0.35) 14px 15px);
+    mask-image: radial-gradient(circle at 50% 50%, #000 30%, transparent 70%);
+    -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 30%, transparent 70%);
+  }
+
+  /* 07 · Jahit — running stitch rows and a clipped cross-stitch corner */
+  .art-jahit { background: var(--linen-deep); }
+  .art-jahit::before {
+    background:
+      repeating-linear-gradient(90deg, var(--madder) 0 12px, transparent 12px 20px) 0 18% / 100% 2px no-repeat,
+      repeating-linear-gradient(90deg, var(--indigo) 0 8px, transparent 8px 14px) 6px 30% / 100% 2px no-repeat,
+      repeating-linear-gradient(90deg, var(--madder) 0 12px, transparent 12px 20px) 10px 42% / 100% 2px no-repeat,
+      repeating-linear-gradient(90deg, var(--soot) 0 4px, transparent 4px 10px) 0 54% / 100% 2px no-repeat;
+    transform: rotate(-4deg) scale(1.1);
+  }
+  .art-jahit::after {
+    background:
+      repeating-linear-gradient(45deg, transparent 0 6px, var(--indigo) 6px 8px, transparent 8px 14px),
+      repeating-linear-gradient(-45deg, transparent 0 6px, var(--indigo) 6px 8px, transparent 8px 14px);
+    clip-path: polygon(58% 100%, 100% 46%, 100% 100%);
+  }
+  .art-jahit .glint {
+    /* the needle */
+    background: linear-gradient(-28deg, transparent calc(50% - 1px), var(--soot) calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px));
+    clip-path: inset(20% 18% 52% 52%);
+  }
+
+  /* 08 · Rumbai (wide) — a woven band ending in a zigzag-clipped fringe */
+  .art-rumbai { background: var(--linen); }
+  .art-rumbai::before {
+    bottom: 54%;
+    background:
+      repeating-linear-gradient(0deg, transparent 0 6px, oklch(94% 0.022 85 / 0.5) 6px 7px),
+      linear-gradient(180deg, var(--indigo-deep) 0 40%, var(--madder) 40% 52%, var(--indigo) 52%);
+  }
+  .art-rumbai::after {
+    top: 46%;
+    background:
+      repeating-linear-gradient(90deg, var(--indigo) 0 2px, transparent 2px 5px, var(--madder) 5px 6px, transparent 6px 9px);
+    clip-path: polygon(0 0, 100% 0, 100% 64%, 95% 80%, 90% 58%, 84% 86%, 78% 62%, 72% 78%, 66% 56%, 60% 90%, 54% 60%, 48% 76%, 42% 54%, 36% 84%, 30% 60%, 24% 74%, 18% 58%, 12% 88%, 6% 62%, 0 78%);
+    transform-origin: 50% 0;
+    will-change: transform;
+    animation: an-sway 9s ease-in-out infinite alternate-reverse;
+  }
+  .art-rumbai .layer {
+    /* the finishing knots along the hem */
+    top: 44%; bottom: auto; height: 10px;
+    background: radial-gradient(circle, var(--thread) 0 3.5px, transparent 4px) 0 50% / 26px 100%;
+  }
+
+  /* 09 · Kelos — a spool, wound and waiting */
+  .art-kelos {
+    background: radial-gradient(circle at 50% 50%, var(--linen), var(--linen-deep) 80%);
+  }
+  .art-kelos::before {
+    /* the wound thread, clipped to the barrel */
+    background: repeating-linear-gradient(-6deg, var(--madder) 0 2px, oklch(40% 0.13 28) 2px 3px);
+    clip-path: polygon(30% 24%, 70% 24%, 66% 50%, 70% 76%, 30% 76%, 34% 50%);
+  }
+  .art-kelos::after {
+    /* top and bottom flanges */
+    background:
+      radial-gradient(ellipse 24% 6% at 50% 22%, var(--soot) 0 90%, transparent 100%),
+      radial-gradient(ellipse 24% 6% at 50% 78%, var(--soot) 0 90%, transparent 100%),
+      radial-gradient(ellipse 5% 1.6% at 50% 22%, var(--flax) 0 90%, transparent 100%);
+  }
+  .art-kelos .layer {
+    /* the loose end trailing off */
+    background: radial-gradient(circle at 92% 70%, transparent 0 37%, var(--madder) 37.5% 38.5%, transparent 39%);
+    clip-path: inset(30% 0 10% 62%);
+  }
+
+  /* marquee — a running-stitch band drifting RIGHTWARD */
+  .marquee {
+    position: relative;
+    overflow: hidden; max-width: calc(100% + var(--pad) * 2);
+    margin-inline: calc(var(--pad) * -1);
+    padding-block: var(--space-2);
+    background:
+      repeating-linear-gradient(90deg, var(--linen) 0 10px, transparent 10px 16px) 0 4px / 100% 1px no-repeat,
+      repeating-linear-gradient(90deg, var(--linen) 0 10px, transparent 10px 16px) 0 calc(100% - 4px) / 100% 1px no-repeat,
+      var(--indigo-deep);
+  }
+  .marquee-track {
+    display: flex; gap: clamp(1.4rem, 5vw, 3.6rem); width: max-content;
+    animation: an-run 52s linear infinite; will-change: transform;
+  }
+  .gl { font-size: var(--text-xl); line-height: 1.2; color: var(--linen); font-family: var(--font-mono); }
+  .gl:nth-child(3n) { color: var(--madder-pale); }
+  .gl:nth-child(4n) { color: oklch(80% 0.07 135); }
+  @keyframes an-run { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+
+  /* colophon */
+  .colophon {
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 0.5rem;
+    font-family: var(--font-mono); font-size: var(--text-xs);
+    letter-spacing: 0.06em; color: var(--soot-soft);
+    border-top: 2px solid var(--soot);
+    padding-top: var(--space-2); padding-bottom: var(--space-3);
+  }
+  .pulse { display: inline-flex; align-items: center; gap: 0.5rem; }
+  .pulse .knot {
+    width: 14px;
+    will-change: transform;
+    animation: an-turn 6s ease-in-out infinite;
+  }
+  @keyframes an-turn {
+    0%, 100% { transform: rotate(0deg); }
+    50%      { transform: rotate(90deg); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stage *, .stage *::before, .stage *::after { animation: none !important; }
+    .plate { transition: none; }
+  }
+</style>
