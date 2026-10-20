@@ -1,0 +1,680 @@
+---
+/*
+ * DailyShowcase — the AI-owned canvas.
+ * Rewritten in full by Claude once per day (scripts/regen.sh).
+ * Contract: self-contained Astro component (frontmatter + markup + scoped <style>).
+ * No imports, no network (no fonts/images/CDN/fetch), no client JS beyond tiny
+ * compositor-only motion. Must compile with `astro build`. SEO <head> lives in
+ * Base.astro — leave it alone. Reuse tokens from src/styles/tokens.css.
+ * The frontmatter is the only state carried across days.
+ *
+ * Quality bar (keep it RICH, not bare): layered hero with weight, a bento gallery
+ * where EACH plate is a real generative-CSS artwork, grain texture, a moving
+ * marquee, intentional asymmetry. Avoid a plain centered-headline page.
+ *
+ * Edition 101 — after the loom, we sink. 100 (ANYAMAN) was raw linen in daylight;
+ * 101 is PENDAR — the abyss: a near-black sea-ink ground (h≈215, L≈13%), lit only
+ * by what lives there — phosphor cyan (h≈190), plankton chartreuse (h≈125) and a
+ * jellyfish violet (h≈305). The --accent token is the single ember lure of an
+ * anglerfish, nowhere else.
+ * Composition inverts yesterday: the numeral "101" floats TOP-LEFT as a
+ * conic-lit ghost, the title sinks to the BOTTOM-RIGHT and is right-aligned, and
+ * the stats stand as a vertical depth gauge on the LEFT. Gallery: a wide current
+ * across the top with plankton beside it, two stacked regulars LEFT of a
+ * jellyfish FEATURE on the right, then a TALL trench on the RIGHT edge of rows
+ * 4–5 with coral + bubbles above a wide fog band. The marquee drifts LEFTWARD
+ * on a sine-wave rule.
+ * Techniques: pulsing repeating-radial bell with masked tentacles, difference-
+ * blended rotated line moiré, screen-blended multi-scale dot mesh, rotating
+ * conic sonar sweep over ring grid, offset radial scale tiling, repeating-conic
+ * coral fan under a radial mask, stacked clip-path strata, rising radial bubbles,
+ * and a blurred screen-mesh fog with hue drift.
+ */
+const edition = {
+  no: 101,
+  date: '2026-10-21',
+  title: 'Pendar',
+  kicker: 'Pameran harian / tentang cahaya yang dibuat sendiri',
+  subtitle:
+    'Di kedalaman tempat matahari tidak pernah sampai, segala yang hidup belajar menyala dari dalam — pelan, dingin, dan hanya cukup untuk ditemukan.',
+};
+
+const stats = [
+  { k: '101', label: 'edisi, satu sinar per hari' },
+  { k: '−4.000 m', label: 'kedalaman tempat cahaya pertama padam' },
+  { k: '1', label: 'umpan merah yang berani berkedip' },
+];
+
+const plates = [
+  { id: 'arus',      tag: '01', name: 'Arus',      note: 'line moiré · dua arus yang saling memotong diam-diam',  size: 'wide' },
+  { id: 'plankton',  tag: '02', name: 'Plankton',  note: 'dot mesh · debu hidup yang menyala bila disentuh',      size: '' },
+  { id: 'sonar',     tag: '03', name: 'Sonar',     note: 'conic sweep · gema yang kembali tanpa membawa jawaban', size: '' },
+  { id: 'ubur',      tag: '04', name: 'Ubur',      note: 'radial bell · lonceng lunak yang bernapas di gelap',    size: 'feature' },
+  { id: 'sisik',     tag: '05', name: 'Sisik',     note: 'offset radii · baju zirah dari setengah lingkaran',      size: '' },
+  { id: 'karang',    tag: '06', name: 'Karang',    note: 'conic fan · kipas kapur yang tumbuh satu milimeter',     size: '' },
+  { id: 'gelembung', tag: '07', name: 'Gelembung', note: 'rising radii · napas terakhir yang naik ke permukaan',   size: '' },
+  { id: 'palung',    tag: '08', name: 'Palung',    note: 'clip strata · lapisan demi lapisan menuju dasar',        size: 'tall' },
+  { id: 'kabut',     tag: '09', name: 'Kabut',     note: 'screen mesh · awan cahaya yang tidak pernah mendarat',   size: 'wide' },
+];
+
+const glyphs = ['◌', '∿', '○', '≈', '◎', '⁂', '∘', '✺', '⌇', '◉', '⋰', '∾'];
+const marquee = [...glyphs, ...glyphs];
+const numeral = String(edition.no);
+const edNo = String(edition.no).padStart(3, '0');
+---
+
+<section class="stage" aria-label={`Pameran visual abstrak — ${edition.title}`}>
+  <div class="abyss" aria-hidden="true">
+    <span class="glow glow-a"></span>
+    <span class="glow glow-b"></span>
+    <span class="snow"></span>
+  </div>
+
+  <header class="masthead">
+    <span class="ed"><i class="lure" aria-hidden="true"></i>Edisi {edNo}</span>
+    <span class="ed-mid">{edition.kicker}</span>
+    <span class="ed-date">{edition.date}</span>
+  </header>
+
+  <div class="hero">
+    <div class="huge-wrap" aria-hidden="true">
+      <span class="huge huge-echo">{numeral}</span>
+      <span class="huge huge-no">{numeral}</span>
+    </div>
+    <dl class="stats" aria-label="Pengukur kedalaman">
+      {stats.map((s, i) => (
+        <div class="stat">
+          <dt class="stat-k">{s.k}</dt>
+          <dd class="stat-l"><span class="stat-i" aria-hidden="true">{['α', 'β', 'γ'][i]}</span> {s.label}</dd>
+        </div>
+      ))}
+    </dl>
+    <div class="hero-text">
+      <p class="kicker">Spesimen harian · edisi seratus satu · dinyalakan di zona tengah malam</p>
+      <h1 class="title"><span class="title-word">{edition.title}</span></h1>
+      <p class="lede">{edition.subtitle}</p>
+    </div>
+  </div>
+
+  <section class="gallery" aria-label="Spesimen cahaya laut dalam">
+    {plates.map((p) => (
+      <figure class={`plate ${p.size} plate-${p.id}`} aria-label={`${p.name} — ${p.note}`}>
+        <span class={`art art-${p.id}`} aria-hidden="true"><i class="layer"></i><i class="glint"></i></span>
+        <figcaption class="cap">
+          <span class="cap-tag">{p.tag}</span>
+          <span class="cap-body">
+            <b class="cap-name">{p.name}</b>
+            <i class="cap-note">{p.note}</i>
+          </span>
+        </figcaption>
+      </figure>
+    ))}
+  </section>
+
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track">
+      {marquee.map((g) => <span class="gl">{g}</span>)}
+    </div>
+  </div>
+
+  <footer class="colophon">
+    <span class="pulse"><i class="lure" aria-hidden="true"></i> di bawah sini, menyala bukan untuk terlihat — tapi untuk saling menemukan</span>
+    <span>Edisi {edNo} · {edition.title} · CSS murni · tanpa aset eksternal</span>
+  </footer>
+</section>
+
+<style>
+  /* sea-ink abyss, phosphor cyan, plankton chartreuse, jelly violet — one ember lure */
+  .stage {
+    --pad: clamp(1.1rem, 4vw, 3rem);
+    --ink-sea: oklch(13% 0.03 215);
+    --ink-deep: oklch(9% 0.025 220);
+    --ink-mid: oklch(20% 0.04 210);
+    --silt: oklch(32% 0.035 205);
+    --foam: oklch(93% 0.025 195);
+    --foam-soft: oklch(74% 0.04 200);
+    --cyan: oklch(82% 0.13 190);
+    --cyan-deep: oklch(56% 0.11 195);
+    --chart: oklch(88% 0.17 125);
+    --chart-deep: oklch(62% 0.14 130);
+    --violet: oklch(66% 0.17 305);
+    --violet-deep: oklch(40% 0.14 300);
+    --lure: var(--accent);
+
+    position: relative; isolation: isolate; overflow: hidden;
+    display: flex; flex-direction: column; gap: clamp(2rem, 5vw, 4.5rem);
+    padding: var(--pad);
+    border-radius: var(--radius);
+    background:
+      radial-gradient(ellipse 70% 40% at 50% -10%, oklch(30% 0.06 200 / 0.55), transparent 70%),
+      radial-gradient(ellipse 50% 35% at 100% 70%, oklch(30% 0.1 305 / 0.28), transparent 70%),
+      linear-gradient(180deg, var(--ink-sea) 0%, var(--ink-deep) 100%);
+    color: var(--foam); font-family: var(--font-sans);
+  }
+
+  /* film grain — screened, so it reads as marine snow catching light */
+  .stage::after {
+    content: ''; position: absolute; inset: 0; z-index: 40; pointer-events: none;
+    opacity: 0.11; mix-blend-mode: screen;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* the lure — the only warm light in the sea */
+  .lure {
+    display: inline-block; flex: none;
+    width: 0.7em; aspect-ratio: 1; border-radius: 50%;
+    background: radial-gradient(circle at 38% 34%, oklch(92% 0.08 60), var(--lure) 55%, oklch(40% 0.14 35));
+    box-shadow: 0 0 0.5em var(--lure), 0 0 1.4em oklch(58% 0.16 38 / 0.5);
+  }
+
+  /* abyss — two drifting glows and rising marine snow */
+  .abyss { position: absolute; inset: 0; z-index: -1; overflow: hidden; }
+  .glow {
+    position: absolute; border-radius: 50%;
+    filter: blur(60px);
+    will-change: transform, opacity;
+    animation: pd-drift 30s ease-in-out infinite alternate;
+  }
+  .glow-a {
+    width: 44vmax; height: 34vmax; top: -10vmax; left: -16vmax;
+    background: radial-gradient(circle, oklch(82% 0.13 190 / 0.16), transparent 65%);
+  }
+  .glow-b {
+    width: 38vmax; height: 30vmax; bottom: 10%; right: -16vmax;
+    background: radial-gradient(circle, oklch(66% 0.17 305 / 0.18), transparent 65%);
+    animation-duration: 38s; animation-delay: -14s;
+  }
+  @keyframes pd-drift {
+    from { transform: translate3d(0, 0, 0) scale(0.92); opacity: 0.55; }
+    to   { transform: translate3d(5vmax, 4vmax, 0) scale(1.1); opacity: 1; }
+  }
+  .snow {
+    position: absolute; inset: -20% 0 0 0;
+    background:
+      radial-gradient(circle, oklch(93% 0.025 195 / 0.5) 0 1px, transparent 1.5px) 0 0 / 90px 110px,
+      radial-gradient(circle, oklch(82% 0.13 190 / 0.4) 0 1.2px, transparent 1.8px) 40px 60px / 140px 130px,
+      radial-gradient(circle, oklch(88% 0.17 125 / 0.3) 0 1px, transparent 1.5px) 70px 20px / 170px 190px;
+    will-change: transform;
+    animation: pd-rise 40s linear infinite;
+  }
+  @keyframes pd-rise {
+    from { transform: translate3d(0, 0, 0); }
+    to   { transform: translate3d(0, -16%, 0); }
+  }
+
+  /* masthead — a sine-wave rule */
+  .masthead {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 0.6rem 1rem; flex-wrap: wrap;
+    font-family: var(--font-mono); font-size: var(--text-xs);
+    letter-spacing: var(--tracking-wide); text-transform: uppercase;
+    color: var(--foam-soft);
+    padding-bottom: var(--space-2);
+    background:
+      radial-gradient(circle at 50% 0, transparent 5px, oklch(82% 0.13 190 / 0.6) 5.5px 6.5px, transparent 7px) 0 calc(100% - 2px) / 18px 8px repeat-x;
+  }
+  .ed { display: inline-flex; align-items: center; gap: 0.6em; color: var(--foam); font-weight: 700; }
+  .ed-mid { display: none; color: var(--cyan); }
+  .ed-date {
+    color: var(--ink-deep); font-weight: 700;
+    padding: 0.3em 0.8em; border-radius: 999px;
+    background: var(--cyan);
+    box-shadow: 0 0 18px oklch(82% 0.13 190 / 0.45);
+  }
+  @media (min-width: 720px) { .ed-mid { display: inline; } }
+
+  /* hero — ghost numeral TOP-LEFT, depth gauge LEFT, title sinking BOTTOM-RIGHT */
+  .hero {
+    position: relative; overflow: hidden;
+    display: flex; flex-direction: column;
+    gap: clamp(1.4rem, 3vw, 2.2rem);
+  }
+  .huge-wrap {
+    position: relative; z-index: 0;
+    overflow: hidden; max-width: 100%; pointer-events: none;
+    height: clamp(7.5rem, 40vw, 13rem);
+  }
+  .huge {
+    position: absolute; left: -0.04em; top: -0.1em;
+    font-family: var(--font-sans); font-weight: 900; line-height: 0.85;
+    font-size: clamp(8rem, 44vw, 20rem); letter-spacing: -0.07em;
+    user-select: none; white-space: nowrap;
+  }
+  .huge-no {
+    color: transparent;
+    background:
+      repeating-linear-gradient(0deg, transparent 0 5px, oklch(9% 0.025 220 / 0.55) 5px 7px),
+      conic-gradient(from 210deg at 40% 60%, var(--cyan), var(--violet), var(--chart-deep), var(--cyan-deep), var(--cyan));
+    -webkit-background-clip: text; background-clip: text;
+    opacity: 0.82;
+  }
+  .huge-echo {
+    color: transparent;
+    -webkit-text-stroke: 1.5px oklch(82% 0.13 190 / 0.55);
+    will-change: transform, opacity;
+    animation: pd-echo 8s ease-in-out infinite;
+  }
+  @keyframes pd-echo {
+    0%, 100% { transform: translate3d(0.03em, 0.04em, 0) scale(1); opacity: 0.35; }
+    50%      { transform: translate3d(0.06em, 0.07em, 0) scale(1.015); opacity: 0.85; }
+  }
+
+  .stats { position: relative; z-index: 2; }
+  .hero-text { position: relative; z-index: 2; max-width: 100%; }
+
+  @media (min-width: 720px) {
+    .hero {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      grid-template-rows: 1fr auto;
+      column-gap: clamp(1rem, 3vw, 2rem); row-gap: clamp(1.5rem, 3vw, 2.5rem);
+      min-height: clamp(32rem, 56vw, 44rem);
+    }
+    .huge-wrap {
+      position: absolute; left: 0; top: 0;
+      width: 78%; height: 78%;
+    }
+    .huge { font-size: clamp(16rem, 34vw, 30rem); }
+    .stats { grid-column: 1 / span 4; grid-row: 2; align-self: end; flex-direction: column; }
+    .hero-text { grid-column: 6 / -1; grid-row: 1 / -1; align-self: end; text-align: right; }
+    .lede { margin-left: auto; padding-left: 0; padding-right: var(--space-2); border-left: 0; border-right: 2px solid var(--violet); }
+  }
+
+  .kicker {
+    margin: 0 0 var(--space-2); font-family: var(--font-mono);
+    font-size: var(--text-xs); letter-spacing: var(--tracking-wide);
+    text-transform: uppercase; color: var(--chart);
+  }
+  .title {
+    position: relative; display: inline-block; max-width: 100%; margin: 0;
+    font-size: clamp(3rem, 0.4rem + 13vw, 10rem); line-height: 0.88; font-weight: 900;
+    letter-spacing: -0.055em;
+    overflow-wrap: anywhere;
+  }
+  .title-word {
+    color: var(--foam);
+    text-shadow: 0 0 0.18em oklch(82% 0.13 190 / 0.55), 0 0 0.6em oklch(66% 0.17 305 / 0.35);
+  }
+  .lede {
+    margin: var(--space-4) 0 0; max-width: 44ch;
+    font-family: var(--font-mono); font-size: var(--text-base);
+    line-height: 1.7; color: var(--foam-soft);
+    padding-left: var(--space-2);
+    border-left: 2px solid var(--violet);
+  }
+  @media (min-width: 720px) { .lede { font-size: var(--text-lg); } }
+
+  /* stats — a depth gauge; ticks along the left like a sounding line */
+  .stats {
+    display: flex; flex-wrap: wrap;
+    gap: clamp(0.5rem, 1.5vw, 0.8rem);
+    margin: 0; max-width: 100%;
+  }
+  .stat {
+    flex: 1 1 9rem; min-width: 0; min-height: 44px;
+    display: flex; flex-direction: column; gap: 0.3rem;
+    padding: clamp(0.7rem, 2vw, 0.95rem) clamp(0.85rem, 2vw, 1.1rem) clamp(0.7rem, 2vw, 0.95rem) 1.4rem;
+    background:
+      repeating-linear-gradient(180deg, oklch(82% 0.13 190 / 0.7) 0 1px, transparent 1px 7px) 0.5rem 0 / 6px 100% no-repeat,
+      oklch(20% 0.04 210 / 0.55);
+    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    border: 1px solid oklch(82% 0.13 190 / 0.16);
+    border-radius: var(--radius-sm);
+  }
+  .stat-k {
+    margin: 0; font-size: clamp(1.45rem, 1rem + 1.5vw, 2.2rem); font-weight: 800;
+    letter-spacing: -0.035em; line-height: 1; color: var(--cyan);
+    overflow-wrap: anywhere;
+  }
+  .stat:nth-child(2) .stat-k { color: var(--violet); }
+  .stat:nth-child(3) .stat-k { color: var(--lure); text-shadow: 0 0 12px oklch(58% 0.16 38 / 0.6); }
+  .stat-l {
+    margin: 0; min-width: 0;
+    font-family: var(--font-mono); font-size: var(--text-xs);
+    letter-spacing: 0.05em; text-transform: uppercase; color: var(--foam-soft);
+  }
+  .stat-i { color: var(--chart); font-weight: 700; }
+
+  /* bento — wide current + plankton, stacked pair LEFT of the jelly FEATURE,
+     TALL trench RIGHT with coral, bubbles and a wide fog band beside it */
+  .gallery {
+    display: grid; gap: clamp(0.6rem, 1.5vw, 1rem);
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: 13.5rem;
+  }
+  @media (min-width: 480px) {
+    .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 12rem; }
+  }
+  @media (min-width: 720px) {
+    .gallery {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      grid-auto-rows: 12.5rem;
+    }
+    .plate-arus      { grid-column: 1 / span 8;  grid-row: 1; }
+    .plate-plankton  { grid-column: 9 / -1;      grid-row: 1; }
+    .plate-sonar     { grid-column: 1 / span 4;  grid-row: 2; }
+    .plate-sisik     { grid-column: 1 / span 4;  grid-row: 3; }
+    .plate-ubur      { grid-column: 5 / -1;      grid-row: 2 / span 2; }
+    .plate-karang    { grid-column: 1 / span 5;  grid-row: 4; }
+    .plate-gelembung { grid-column: 6 / span 4;  grid-row: 4; }
+    .plate-palung    { grid-column: 10 / -1;     grid-row: 4 / span 2; }
+    .plate-kabut     { grid-column: 1 / span 9;  grid-row: 5; }
+  }
+  .plate {
+    position: relative; overflow: hidden; margin: 0;
+    border-radius: var(--radius-sm);
+    border: 1px solid oklch(82% 0.13 190 / 0.14);
+    background: var(--ink-deep);
+    box-shadow: 0 0 0 1px oklch(0% 0 0 / 0.4), 0 24px 40px -28px oklch(0% 0 0 / 0.9);
+    transition: transform var(--duration) var(--ease), box-shadow var(--duration) var(--ease), border-color var(--duration) var(--ease);
+  }
+  .plate:hover {
+    transform: translateY(-3px);
+    border-color: oklch(82% 0.13 190 / 0.4);
+    box-shadow: 0 0 0 1px oklch(0% 0 0 / 0.4), 0 0 34px -10px oklch(82% 0.13 190 / 0.45);
+  }
+  .art { position: absolute; inset: 0; overflow: hidden; }
+  .art::before, .art::after, .layer, .glint { content: ''; position: absolute; inset: 0; }
+  .cap {
+    position: absolute; inset: auto var(--space-1) var(--space-1) var(--space-1); z-index: 2;
+    display: flex; gap: var(--space-2); align-items: center;
+    min-height: 3rem; padding: 0.5rem var(--space-2);
+    background: oklch(11% 0.03 215 / 0.72);
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    border: 1px solid oklch(82% 0.13 190 / 0.14);
+    border-radius: 6px;
+  }
+  .cap-tag {
+    flex: none; display: grid; place-items: center;
+    width: 2em; aspect-ratio: 1; border-radius: 50%;
+    font-family: var(--font-mono); font-weight: 700;
+    font-size: var(--text-xs); color: var(--ink-deep);
+    background: var(--cyan);
+  }
+  .plate:nth-child(3n + 2) .cap-tag { background: var(--chart); }
+  .plate:nth-child(3n) .cap-tag { background: var(--violet); color: var(--foam); }
+  .cap-body { display: flex; flex-direction: column; min-width: 0; }
+  .cap-name { font-weight: 800; letter-spacing: -0.01em; color: var(--foam); }
+  .cap-note {
+    font-style: normal; font-family: var(--font-mono);
+    font-size: var(--text-xs); color: var(--foam-soft);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  /* ── generative abyss — nothing here is lit from outside ── */
+
+  /* 01 · Arus (wide) — two rotated line fields, difference-blended into moiré */
+  .art-arus { background: var(--ink-deep); }
+  .art-arus::before {
+    inset: -40%;
+    background: repeating-linear-gradient(8deg, var(--cyan-deep) 0 1.5px, transparent 1.5px 7px);
+  }
+  .art-arus::after {
+    inset: -40%;
+    background: repeating-linear-gradient(-4deg, var(--violet) 0 1.5px, transparent 1.5px 7.5px);
+    mix-blend-mode: difference;
+    will-change: transform;
+    animation: pd-current 18s ease-in-out infinite alternate;
+  }
+  @keyframes pd-current {
+    from { transform: rotate(0deg) translate3d(0, 0, 0); }
+    to   { transform: rotate(3deg) translate3d(-2%, 1%, 0); }
+  }
+  .art-arus .layer {
+    z-index: 1;
+    background: radial-gradient(ellipse 60% 90% at 50% 50%, transparent 30%, var(--ink-deep) 85%);
+  }
+
+  /* 02 · Plankton — three scales of dot mesh, screened over violet haze */
+  .art-plankton {
+    background: radial-gradient(circle at 70% 30%, oklch(40% 0.14 300 / 0.8), transparent 60%), var(--ink-deep);
+  }
+  .art-plankton::before {
+    background:
+      radial-gradient(circle, var(--chart) 0 1.5px, transparent 2px) 0 0 / 14px 14px,
+      radial-gradient(circle, var(--cyan) 0 1px, transparent 1.5px) 7px 7px / 14px 14px;
+    mask-image: radial-gradient(ellipse 55% 60% at 40% 55%, #000 20%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse 55% 60% at 40% 55%, #000 20%, transparent 75%);
+    mix-blend-mode: screen;
+  }
+  .art-plankton::after {
+    background: radial-gradient(circle, oklch(88% 0.17 125 / 0.9) 0 3px, transparent 6px) 10px 18px / 46px 52px;
+    filter: blur(1px);
+    mix-blend-mode: screen;
+    mask-image: linear-gradient(120deg, transparent 20%, #000 50%, transparent 85%);
+    -webkit-mask-image: linear-gradient(120deg, transparent 20%, #000 50%, transparent 85%);
+  }
+
+  /* 03 · Sonar — a conic sweep turning over a ring grid */
+  .art-sonar {
+    background:
+      repeating-radial-gradient(circle at 50% 50%, transparent 0 22px, oklch(82% 0.13 190 / 0.28) 22px 23px),
+      linear-gradient(90deg, transparent calc(50% - 0.5px), oklch(82% 0.13 190 / 0.2) calc(50% - 0.5px) calc(50% + 0.5px), transparent calc(50% + 0.5px)),
+      linear-gradient(0deg, transparent calc(50% - 0.5px), oklch(82% 0.13 190 / 0.2) calc(50% - 0.5px) calc(50% + 0.5px), transparent calc(50% + 0.5px)),
+      var(--ink-deep);
+  }
+  .art-sonar::before {
+    inset: -50%;
+    background: conic-gradient(from 0deg, transparent 0 290deg, oklch(82% 0.13 190 / 0.05) 300deg, oklch(82% 0.13 190 / 0.6) 360deg);
+    will-change: transform;
+    animation: pd-sweep 6s linear infinite;
+  }
+  @keyframes pd-sweep { to { transform: rotate(360deg); } }
+  .art-sonar::after {
+    /* the blips it found */
+    background:
+      radial-gradient(circle at 68% 34%, var(--chart) 0 3px, transparent 7px),
+      radial-gradient(circle at 30% 62%, var(--cyan) 0 2px, transparent 6px),
+      radial-gradient(circle at 58% 76%, var(--lure) 0 2.5px, transparent 6px);
+  }
+
+  /* 04 · Ubur (feature) — a pulsing ringed bell trailing masked tentacles */
+  .art-ubur {
+    background: radial-gradient(ellipse 80% 70% at 50% 30%, oklch(26% 0.08 290), var(--ink-deep) 75%);
+  }
+  .art-ubur::before {
+    /* tentacles — fine lines, fading with depth, gently swaying */
+    top: 38%; left: 28%; right: 28%;
+    background:
+      repeating-linear-gradient(90deg, transparent 0 9px, oklch(66% 0.17 305 / 0.7) 9px 10px, transparent 10px 15px, oklch(82% 0.13 190 / 0.5) 15px 16px);
+    mask-image: linear-gradient(180deg, #000 10%, transparent 92%);
+    -webkit-mask-image: linear-gradient(180deg, #000 10%, transparent 92%);
+    transform-origin: 50% 0;
+    will-change: transform;
+    animation: pd-trail 5s ease-in-out infinite alternate;
+  }
+  @keyframes pd-trail {
+    from { transform: skewX(-6deg) scaleY(0.94); }
+    to   { transform: skewX(5deg) scaleY(1.04); }
+  }
+  .art-ubur .layer {
+    /* the bell — ringed dome clipped to an arch */
+    inset: 10% 24% 50% 24%;
+    background:
+      radial-gradient(ellipse 60% 40% at 50% 92%, oklch(88% 0.17 125 / 0.5), transparent 70%),
+      repeating-radial-gradient(ellipse at 50% 100%, oklch(66% 0.17 305 / 0.75) 0 3px, oklch(40% 0.14 300 / 0.25) 3px 9px),
+      oklch(40% 0.14 300 / 0.4);
+    clip-path: ellipse(50% 100% at 50% 100%);
+    filter: drop-shadow(0 0 18px oklch(66% 0.17 305 / 0.6));
+    transform-origin: 50% 100%;
+    will-change: transform;
+    animation: pd-breathe 5s ease-in-out infinite alternate;
+  }
+  @keyframes pd-breathe {
+    from { transform: scale(0.96, 1.02); }
+    to   { transform: scale(1.04, 0.94); }
+  }
+  .art-ubur::after {
+    /* oral arms — two soft frilled ribbons */
+    top: 46%; left: 42%; right: 42%; bottom: 8%;
+    background: repeating-linear-gradient(170deg, oklch(82% 0.13 190 / 0.55) 0 3px, transparent 3px 8px);
+    clip-path: polygon(10% 0, 45% 0, 30% 40%, 50% 70%, 20% 100%, 0 60%, 20% 35%, 55% 0, 90% 0, 75% 30%, 100% 60%, 70% 100%, 60% 65%, 80% 35%);
+    filter: blur(0.6px);
+  }
+  .art-ubur .glint {
+    background: radial-gradient(circle at 50% 22%, oklch(93% 0.025 195 / 0.25), transparent 30%);
+    mix-blend-mode: screen;
+  }
+
+  /* 05 · Sisik — offset half-circle scale tiling, iridescent wash */
+  .art-sisik {
+    background:
+      radial-gradient(circle at 50% 100%, var(--ink-deep) 0 45%, var(--cyan-deep) 46% 48%, var(--ink-mid) 49% 62%, transparent 63%) 0 0 / 32px 20px,
+      radial-gradient(circle at 50% 100%, var(--ink-deep) 0 45%, var(--cyan-deep) 46% 48%, var(--ink-mid) 49% 62%, transparent 63%) 16px 10px / 32px 20px,
+      var(--ink-deep);
+  }
+  .art-sisik::before {
+    background: linear-gradient(125deg, oklch(82% 0.13 190 / 0.55), oklch(66% 0.17 305 / 0.5) 45%, oklch(88% 0.17 125 / 0.45) 90%);
+    mix-blend-mode: color-dodge;
+    opacity: 0.7;
+  }
+  .art-sisik::after {
+    background: radial-gradient(ellipse 50% 70% at 30% 30%, transparent 40%, oklch(9% 0.025 220 / 0.85));
+  }
+
+  /* 06 · Karang — a repeating-conic coral fan under a radial mask */
+  .art-karang { background: linear-gradient(180deg, var(--ink-mid), var(--ink-deep)); }
+  .art-karang::before {
+    background: repeating-conic-gradient(from -70deg at 50% 100%, oklch(66% 0.17 305 / 0.9) 0 1.6deg, transparent 1.6deg 6deg);
+    mask-image: radial-gradient(circle at 50% 100%, #000 0 30%, transparent 30% 34%, #000 34% 52%, transparent 52% 55%, #000 55% 72%, transparent 82%);
+    -webkit-mask-image: radial-gradient(circle at 50% 100%, #000 0 30%, transparent 30% 34%, #000 34% 52%, transparent 52% 55%, #000 55% 72%, transparent 82%);
+    clip-path: polygon(0 100%, 8% 30%, 30% 6%, 70% 6%, 92% 30%, 100% 100%);
+  }
+  .art-karang::after {
+    /* polyps glowing at the tips */
+    background: radial-gradient(circle, var(--chart) 0 1.5px, transparent 3px) 0 0 / 22px 18px;
+    mask-image: radial-gradient(circle at 50% 100%, transparent 60%, #000 66%, transparent 78%);
+    -webkit-mask-image: radial-gradient(circle at 50% 100%, transparent 60%, #000 66%, transparent 78%);
+  }
+
+  /* 07 · Gelembung — rising rings, each a hollow radial */
+  .art-gelembung {
+    background: linear-gradient(0deg, var(--ink-deep), oklch(24% 0.06 200));
+  }
+  .art-gelembung::before {
+    background:
+      radial-gradient(circle at 30% 70%, transparent 0 13px, oklch(93% 0.025 195 / 0.7) 14px 15px, transparent 16px),
+      radial-gradient(circle at 62% 40%, transparent 0 8px, oklch(82% 0.13 190 / 0.7) 9px 10px, transparent 11px),
+      radial-gradient(circle at 46% 18%, transparent 0 5px, oklch(93% 0.025 195 / 0.6) 6px 7px, transparent 8px),
+      radial-gradient(circle at 74% 82%, transparent 0 18px, oklch(82% 0.13 190 / 0.5) 19px 20px, transparent 21px),
+      radial-gradient(circle at 20% 34%, transparent 0 4px, oklch(93% 0.025 195 / 0.6) 5px 6px, transparent 7px);
+    will-change: transform, opacity;
+    animation: pd-bubble 9s ease-in infinite;
+  }
+  .art-gelembung::after {
+    background:
+      radial-gradient(circle at 28% 68%, oklch(100% 0 0 / 0.7) 0 2px, transparent 3px),
+      radial-gradient(circle at 60% 38%, oklch(100% 0 0 / 0.6) 0 1.5px, transparent 2.5px),
+      radial-gradient(circle at 71% 79%, oklch(100% 0 0 / 0.6) 0 2.5px, transparent 3.5px);
+    will-change: transform, opacity;
+    animation: pd-bubble 9s ease-in infinite;
+  }
+  @keyframes pd-bubble {
+    0%   { transform: translate3d(0, 30%, 0); opacity: 0; }
+    20%  { opacity: 1; }
+    85%  { opacity: 1; }
+    100% { transform: translate3d(2%, -40%, 0); opacity: 0; }
+  }
+  .art-gelembung .glint {
+    background: linear-gradient(180deg, oklch(82% 0.13 190 / 0.18), transparent 40%);
+  }
+
+  /* 08 · Palung (tall) — stacked clip-path strata descending to a single glint */
+  .art-palung { background: linear-gradient(180deg, oklch(30% 0.06 200), var(--ink-deep) 60%); }
+  .art-palung::before {
+    background:
+      linear-gradient(180deg, oklch(24% 0.05 205), oklch(16% 0.035 212));
+    clip-path: polygon(0 18%, 30% 22%, 55% 16%, 100% 24%, 100% 100%, 0 100%);
+  }
+  .art-palung::after {
+    background:
+      repeating-linear-gradient(178deg, transparent 0 6px, oklch(82% 0.13 190 / 0.08) 6px 7px),
+      linear-gradient(180deg, oklch(14% 0.03 215), oklch(8% 0.02 220));
+    clip-path: polygon(0 46%, 20% 40%, 48% 50%, 76% 42%, 100% 48%, 100% 100%, 0 100%);
+  }
+  .art-palung .layer {
+    z-index: 1;
+    background: oklch(6% 0.015 225);
+    clip-path: polygon(0 100%, 0 70%, 28% 74%, 42% 96%, 58% 96%, 72% 72%, 100% 68%, 100% 100%);
+  }
+  .art-palung .glint {
+    /* something at the bottom looks back */
+    z-index: 2;
+    background: radial-gradient(circle at 50% 90%, var(--lure) 0 3px, oklch(58% 0.16 38 / 0.35) 4px, transparent 22px);
+    will-change: opacity;
+    animation: pd-blink 4.5s ease-in-out infinite;
+  }
+  @keyframes pd-blink {
+    0%, 100% { opacity: 0.25; }
+    45%, 55% { opacity: 1; }
+  }
+
+  /* 09 · Kabut (wide) — a blurred screen mesh drifting through hue */
+  .art-kabut { background: var(--ink-deep); }
+  .art-kabut::before {
+    inset: -20%;
+    background:
+      radial-gradient(ellipse 30% 50% at 20% 50%, oklch(82% 0.13 190 / 0.7), transparent 70%),
+      radial-gradient(ellipse 26% 60% at 52% 40%, oklch(66% 0.17 305 / 0.7), transparent 70%),
+      radial-gradient(ellipse 30% 45% at 82% 60%, oklch(88% 0.17 125 / 0.55), transparent 70%);
+    filter: blur(22px);
+    mix-blend-mode: screen;
+    will-change: transform, filter;
+    animation: pd-fog 22s ease-in-out infinite alternate;
+  }
+  @keyframes pd-fog {
+    from { transform: translate3d(-6%, 0, 0); filter: blur(22px) hue-rotate(0deg); }
+    to   { transform: translate3d(6%, -3%, 0); filter: blur(26px) hue-rotate(40deg); }
+  }
+  .art-kabut::after {
+    background: repeating-linear-gradient(0deg, transparent 0 3px, oklch(9% 0.025 220 / 0.45) 3px 4px);
+  }
+  .art-kabut .layer {
+    background: linear-gradient(90deg, var(--ink-deep), transparent 18% 82%, var(--ink-deep));
+  }
+
+  /* marquee — glyphs drifting LEFTWARD between two sine rules */
+  .marquee {
+    position: relative;
+    overflow: hidden; max-width: calc(100% + var(--pad) * 2);
+    margin-inline: calc(var(--pad) * -1);
+    padding-block: var(--space-2);
+    background:
+      radial-gradient(circle at 50% 0, transparent 5px, oklch(82% 0.13 190 / 0.5) 5.5px 6.5px, transparent 7px) 0 2px / 18px 8px repeat-x,
+      radial-gradient(circle at 50% 100%, transparent 5px, oklch(66% 0.17 305 / 0.5) 5.5px 6.5px, transparent 7px) 9px calc(100% - 2px) / 18px 8px repeat-x,
+      oklch(17% 0.04 212);
+  }
+  .marquee-track {
+    display: flex; gap: clamp(1.4rem, 5vw, 3.6rem); width: max-content;
+    animation: pd-flow 56s linear infinite; will-change: transform;
+  }
+  .gl { font-size: var(--text-xl); line-height: 1.2; color: var(--cyan); font-family: var(--font-mono); }
+  .gl:nth-child(3n) { color: var(--violet); }
+  .gl:nth-child(4n) { color: var(--chart); }
+  @keyframes pd-flow { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+  /* colophon */
+  .colophon {
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 0.5rem;
+    font-family: var(--font-mono); font-size: var(--text-xs);
+    letter-spacing: 0.06em; color: var(--foam-soft);
+    border-top: 1px solid oklch(82% 0.13 190 / 0.3);
+    padding-top: var(--space-2); padding-bottom: var(--space-3);
+  }
+  .pulse { display: inline-flex; align-items: center; gap: 0.6rem; }
+  .pulse .lure {
+    width: 12px;
+    will-change: opacity, transform;
+    animation: pd-lure 3.6s ease-in-out infinite;
+  }
+  @keyframes pd-lure {
+    0%, 100% { opacity: 0.45; transform: scale(0.85); }
+    50%      { opacity: 1;    transform: scale(1.1); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stage *, .stage *::before, .stage *::after { animation: none !important; }
+    .plate { transition: none; }
+  }
+</style>
