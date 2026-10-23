@@ -1,0 +1,673 @@
+---
+/*
+ * DailyShowcase — the AI-owned canvas.
+ * Rewritten in full by Claude once per day (scripts/regen.sh).
+ * Contract: self-contained Astro component (frontmatter + markup + scoped <style>).
+ * No imports, no network (no fonts/images/CDN/fetch), no client JS beyond tiny
+ * compositor-only motion. Must compile with `astro build`. SEO <head> lives in
+ * Base.astro — leave it alone. Reuse tokens from src/styles/tokens.css.
+ * The frontmatter is the only state carried across days.
+ *
+ * Quality bar (keep it RICH, not bare): layered hero with weight, a bento gallery
+ * where EACH plate is a real generative-CSS artwork, grain texture, a moving
+ * marquee, intentional asymmetry. Avoid a plain centered-headline page.
+ *
+ * Edition 104 — out of the forest and into the dye vat. 103 (LUMUT) was damp moss
+ * green-black; 104 is NILA — indigo: a deep vat ground (h≈268, L≈19%), woad and
+ * cornflower blues (h≈255–262), unbleached cotton (h≈85) for the resist, a cold
+ * oxidised teal (h≈215) for the moment the cloth leaves the bath, and the copper
+ * --accent token reused only as mordant rust.
+ * Composition flips yesterday: the TITLE now leads TOP-LEFT, the numeral "104"
+ * sinks BOTTOM-RIGHT as a cotton-striped resist, the lede hangs RIGHT beneath the
+ * title, and the stats run as a horizontal ruled ledger along the bottom-left.
+ * Gallery: a dip-dye FEATURE on the LEFT spanning two rows, ikat + shibori on the
+ * top-right, a wide kawung field beneath them, then arashi / wax-crackle / dye drop,
+ * and a full-width drying line to close. The marquee drifts RIGHTWARD.
+ * Techniques: stepped hard-stop dip bands with a feathered mask, blurred ikat
+ * repeating-linear warp under a diamond clip-path, itajime conic fold tile with
+ * ring-resist radial, four-ellipse kawung tile, 45°/47° multiplied arashi moiré,
+ * polygon wax-crackle shards, a breathing radial dye bloom, and swaying clip-path
+ * cloths on a line.
+ */
+const edition = {
+  no: 104,
+  date: '2026-10-24',
+  title: 'Nila',
+  kicker: 'Pameran harian / tentang biru yang lahir dari udara',
+  subtitle:
+    'Kain masuk ke tong berwarna hijau kusam, keluar kuning pucat — lalu, di bawah angin, pelan-pelan ia ingat bahwa dirinya biru.',
+};
+
+const stats = [
+  { k: '104', label: 'edisi, satu celupan tiap pagi' },
+  { k: '12×', label: 'celup sampai biru jadi malam' },
+  { k: '0', label: 'warna yang benar-benar diam' },
+];
+
+const plates = [
+  { id: 'celup',   tag: '01', name: 'Celup',   note: 'stepped bands · tiap celup satu lapis langit',     size: 'feature' },
+  { id: 'ikat',    tag: '02', name: 'Ikat',    note: 'blurred warp · benang yang diikat sebelum ditenun', size: '' },
+  { id: 'shibori', tag: '03', name: 'Shibori', note: 'conic fold · lipatan yang menolak warna',          size: '' },
+  { id: 'kawung',  tag: '04', name: 'Kawung',  note: 'four-ellipse tile · buah aren dalam kisi',         size: 'wide' },
+  { id: 'arashi',  tag: '05', name: 'Arashi',  note: 'moiré 45/47 · badai yang dililit di tiang',        size: '' },
+  { id: 'malam',   tag: '06', name: 'Malam',   note: 'wax crackle · retak lilin, jalan masuk pewarna',    size: '' },
+  { id: 'tetes',   tag: '07', name: 'Tetes',   note: 'radial bloom · satu tetes yang tak mau berhenti',  size: '' },
+  { id: 'jemur',   tag: '08', name: 'Jemur',   note: 'clip cloths · oksigen menyelesaikan pekerjaan',    size: 'wide' },
+];
+
+const glyphs = ['◇', '✕', '◍', '⌘', '◈', '⁜', '⊹', '◐', '✣', '⟡', '⊗', '⌖'];
+const marquee = [...glyphs, ...glyphs];
+const numeral = String(edition.no);
+const edNo = String(edition.no).padStart(3, '0');
+---
+
+<section class="stage" aria-label={`Pameran visual abstrak — ${edition.title}`}>
+  <div class="vat" aria-hidden="true">
+    <span class="swirl swirl-a"></span>
+    <span class="swirl swirl-b"></span>
+  </div>
+
+  <header class="masthead">
+    <span class="ed"><i class="dye-dot" aria-hidden="true"></i>Edisi {edNo}</span>
+    <span class="ed-mid">{edition.kicker}</span>
+    <span class="ed-date">{edition.date}</span>
+  </header>
+
+  <div class="hero">
+    <div class="huge-wrap" aria-hidden="true">
+      <span class="huge">{numeral}</span>
+    </div>
+    <div class="hero-text">
+      <p class="kicker">Spesimen harian · edisi seratus empat · dicelup, diangkat, dibiarkan bernapas</p>
+      <h1 class="title"><span class="title-word">{edition.title}</span><span class="title-dot" aria-hidden="true">.</span></h1>
+    </div>
+    <p class="lede">{edition.subtitle}</p>
+    <dl class="stats" aria-label="Catatan tong celup">
+      {stats.map((s, i) => (
+        <div class="stat">
+          <dt class="stat-k">{s.k}</dt>
+          <dd class="stat-l"><span class="stat-i" aria-hidden="true">{['◇', '◍', '✕'][i]}</span> {s.label}</dd>
+        </div>
+      ))}
+    </dl>
+  </div>
+
+  <section class="gallery" aria-label="Spesimen kain celup">
+    {plates.map((p) => (
+      <figure class={`plate ${p.size} plate-${p.id}`} aria-label={`${p.name} — ${p.note}`}>
+        <span class={`art art-${p.id}`} aria-hidden="true"><i class="layer"></i><i class="glint"></i></span>
+        <figcaption class="cap">
+          <span class="cap-tag">{p.tag}</span>
+          <span class="cap-body">
+            <b class="cap-name">{p.name}</b>
+            <i class="cap-note">{p.note}</i>
+          </span>
+        </figcaption>
+      </figure>
+    ))}
+  </section>
+
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track">
+      {marquee.map((g) => <span class="gl">{g}</span>)}
+    </div>
+  </div>
+
+  <footer class="colophon">
+    <span class="pulse"><i class="dye-dot" aria-hidden="true"></i> biru tidak dituang — biru ditunggu</span>
+    <span>Edisi {edNo} · {edition.title} · CSS murni · tanpa aset eksternal</span>
+  </footer>
+</section>
+
+<style>
+  /* indigo vat, woad, cornflower, unbleached cotton — teal for oxidation, copper for mordant */
+  .stage {
+    --pad: clamp(1.1rem, 4vw, 3rem);
+    --vat: oklch(19% 0.06 268);
+    --vat-deep: oklch(14% 0.045 270);
+    --navy: oklch(28% 0.1 266);
+    --indigo: oklch(38% 0.15 264);
+    --woad: oklch(52% 0.14 258);
+    --corn: oklch(70% 0.11 255);
+    --sky: oklch(84% 0.06 250);
+    --cotton: oklch(94% 0.025 85);
+    --cotton-dim: oklch(84% 0.03 80);
+    --oxide: oklch(64% 0.09 215);
+    --text: oklch(95% 0.015 85);
+    --text-soft: oklch(78% 0.04 250);
+    --rust: var(--accent);
+
+    position: relative; isolation: isolate; overflow: hidden;
+    display: flex; flex-direction: column; gap: clamp(2rem, 5vw, 4.5rem);
+    padding: var(--pad);
+    border-radius: var(--radius);
+    background:
+      radial-gradient(ellipse 60% 45% at 100% 0%, oklch(36% 0.14 262 / 0.6), transparent 70%),
+      radial-gradient(ellipse 50% 40% at 0% 100%, oklch(40% 0.09 215 / 0.35), transparent 70%),
+      linear-gradient(195deg, var(--vat) 0%, var(--vat-deep) 100%);
+    color: var(--text); font-family: var(--font-sans);
+  }
+
+  /* film grain — soft-light, like the slub of hand-spun cotton */
+  .stage::after {
+    content: ''; position: absolute; inset: 0; z-index: 40; pointer-events: none;
+    opacity: 0.16; mix-blend-mode: soft-light;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* dye dot — cotton core ringed by indigo, rust pin */
+  .dye-dot {
+    display: inline-block; flex: none;
+    width: 0.75em; aspect-ratio: 1; border-radius: 50%;
+    background: radial-gradient(circle, var(--rust) 0 22%, var(--cotton) 26% 46%, var(--woad) 50%);
+    box-shadow: 0 0 0 0.16em oklch(64% 0.09 215 / 0.45);
+  }
+
+  /* vat — two slow swirls of oxidising froth */
+  .vat { position: absolute; inset: 0; z-index: -1; overflow: hidden; }
+  .swirl {
+    position: absolute; border-radius: 50%;
+    filter: blur(56px);
+    will-change: transform, opacity;
+    animation: nl-swirl 32s ease-in-out infinite alternate;
+  }
+  .swirl-a {
+    width: 40vmax; height: 28vmax; top: -8vmax; right: -12vmax;
+    background: radial-gradient(circle, oklch(52% 0.14 258 / 0.35), transparent 65%);
+  }
+  .swirl-b {
+    width: 36vmax; height: 26vmax; bottom: 10%; left: -14vmax;
+    background: radial-gradient(circle, oklch(64% 0.09 215 / 0.25), transparent 65%);
+    animation-duration: 40s; animation-delay: -15s;
+  }
+  @keyframes nl-swirl {
+    from { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); opacity: 0.6; }
+    to   { transform: translate3d(-4vmax, 4vmax, 0) rotate(20deg) scale(1.15); opacity: 1; }
+  }
+
+  /* masthead — a selvedge: cotton thread with an indigo stitch */
+  .masthead {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 0.6rem 1rem; flex-wrap: wrap;
+    font-family: var(--font-mono); font-size: var(--text-xs);
+    letter-spacing: var(--tracking-wide); text-transform: uppercase;
+    color: var(--text-soft);
+    padding-bottom: var(--space-2);
+    background: repeating-linear-gradient(90deg, var(--cotton) 0 8px, transparent 8px 12px, var(--woad) 12px 16px, transparent 16px 20px) 0 100% / 100% 2px no-repeat;
+  }
+  .ed { display: inline-flex; align-items: center; gap: 0.6em; color: var(--cotton); font-weight: 700; }
+  .ed-mid { display: none; color: var(--corn); }
+  .ed-date {
+    color: var(--cotton); font-weight: 700;
+    padding: 0.3em 0.8em;
+    border: 1px solid var(--corn);
+    background: repeating-linear-gradient(135deg, oklch(38% 0.15 264 / 0.6) 0 4px, transparent 4px 8px);
+  }
+  @media (min-width: 720px) { .ed-mid { display: inline; } }
+
+  /* hero — title TOP-LEFT, lede RIGHT, stats ledger BOTTOM-LEFT, numeral BOTTOM-RIGHT */
+  .hero {
+    position: relative; overflow: hidden;
+    display: flex; flex-direction: column;
+    gap: clamp(1.4rem, 3vw, 2.2rem);
+  }
+  .hero-text, .lede, .stats { position: relative; z-index: 2; max-width: 100%; }
+
+  .huge-wrap {
+    position: relative; z-index: 0; order: 3;
+    overflow: hidden; max-width: 100%; pointer-events: none;
+    text-align: right;
+    margin-top: calc(clamp(6rem, 38vw, 13rem) * -0.35);
+  }
+  .huge {
+    display: inline-block;
+    font-family: var(--font-sans); font-weight: 900; line-height: 0.82;
+    font-size: clamp(6rem, 40vw, 13rem); letter-spacing: -0.09em;
+    padding-right: 0.06em;
+    user-select: none; white-space: nowrap;
+    color: transparent;
+    background:
+      repeating-linear-gradient(180deg, oklch(94% 0.025 85 / 0.0) 0 0.09em, oklch(94% 0.025 85 / 0.5) 0.09em 0.11em),
+      linear-gradient(180deg, oklch(52% 0.14 258 / 0.7), oklch(28% 0.1 266 / 0.25));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-stroke: 1.5px oklch(70% 0.11 255 / 0.4);
+    will-change: opacity, transform;
+    animation: nl-steep 12s ease-in-out infinite alternate;
+  }
+  @keyframes nl-steep {
+    from { opacity: 0.55; transform: translate3d(0, 0.02em, 0); }
+    to   { opacity: 0.95; transform: translate3d(0, -0.02em, 0); }
+  }
+
+  .kicker {
+    margin: 0 0 var(--space-2); font-family: var(--font-mono);
+    font-size: var(--text-xs); letter-spacing: var(--tracking-wide);
+    text-transform: uppercase; color: var(--oxide);
+  }
+  .title {
+    position: relative; display: inline-block; max-width: 100%; margin: 0;
+    font-size: clamp(3.4rem, 0.8rem + 17vw, 11rem); line-height: 0.82; font-weight: 900;
+    letter-spacing: -0.065em;
+    overflow-wrap: anywhere;
+  }
+  .title-word {
+    color: transparent;
+    background:
+      linear-gradient(180deg, var(--cotton) 0 46%, var(--sky) 46% 58%, var(--corn) 58% 72%, var(--woad) 72%);
+    -webkit-background-clip: text; background-clip: text;
+  }
+  .title-dot { color: var(--rust); }
+
+  .lede {
+    order: 2; margin: 0; max-width: 36ch;
+    font-family: var(--font-mono); font-size: var(--text-base);
+    line-height: 1.75; color: var(--text-soft);
+    padding-top: var(--space-2);
+    border-top: 1px dashed oklch(70% 0.11 255 / 0.55);
+  }
+  .stats { order: 4; }
+
+  @media (min-width: 720px) {
+    .hero {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      grid-template-rows: auto auto 1fr auto;
+      column-gap: clamp(1rem, 3vw, 2rem); row-gap: clamp(1.2rem, 2.5vw, 2rem);
+      min-height: clamp(32rem, 54vw, 44rem);
+    }
+    .hero-text { grid-column: 1 / span 9; grid-row: 1; }
+    .lede { grid-column: 8 / -1; grid-row: 2; justify-self: end; }
+    .huge-wrap { grid-column: 5 / -1; grid-row: 3 / span 2; align-self: end; margin-top: 0; }
+    .huge { font-size: clamp(13rem, 32vw, 26rem); }
+    .stats { grid-column: 1 / span 7; grid-row: 4; align-self: end; flex-wrap: nowrap; }
+  }
+
+  /* stats — a ruled ledger, each entry a woven tab */
+  .stats {
+    display: flex; flex-wrap: wrap;
+    gap: 0;
+    margin: 0;
+    border-top: 2px solid var(--cotton);
+  }
+  .stat {
+    flex: 1 1 8.5rem; min-width: 0; min-height: 44px;
+    display: flex; flex-direction: column; gap: 0.35rem;
+    padding: clamp(0.7rem, 2vw, 1rem) clamp(0.8rem, 2vw, 1.1rem);
+    background: oklch(19% 0.06 268 / 0.72);
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    border-right: 1px solid oklch(70% 0.11 255 / 0.25);
+    border-bottom: 1px solid oklch(70% 0.11 255 / 0.25);
+  }
+  .stat:last-child { border-right: 0; }
+  .stat-k {
+    margin: 0; font-size: clamp(1.5rem, 1rem + 1.6vw, 2.4rem); font-weight: 800;
+    letter-spacing: -0.04em; line-height: 1; color: var(--cotton);
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+  }
+  .stat:nth-child(2) .stat-k { color: var(--corn); }
+  .stat:nth-child(3) .stat-k { color: var(--oxide); }
+  .stat-l {
+    margin: 0; min-width: 0;
+    font-family: var(--font-mono); font-size: var(--text-xs);
+    letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-soft);
+  }
+  .stat-i { color: var(--rust); font-weight: 700; }
+
+  /* bento — dip FEATURE left; ikat + shibori top-right; wide kawung beneath them;
+     arashi / malam / tetes as a row of three; the drying line runs full width */
+  .gallery {
+    display: grid; gap: clamp(0.6rem, 1.5vw, 1rem);
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: 13.5rem;
+  }
+  @media (min-width: 480px) {
+    .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 12rem; }
+    .plate-jemur { grid-column: 1 / -1; }
+  }
+  @media (min-width: 720px) {
+    .gallery {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      grid-auto-rows: 12.5rem;
+    }
+    .plate-celup   { grid-column: 1 / span 5;  grid-row: 1 / span 2; }
+    .plate-ikat    { grid-column: 6 / span 4;  grid-row: 1; }
+    .plate-shibori { grid-column: 10 / -1;     grid-row: 1; }
+    .plate-kawung  { grid-column: 6 / -1;      grid-row: 2; }
+    .plate-arashi  { grid-column: 1 / span 3;  grid-row: 3; }
+    .plate-malam   { grid-column: 4 / span 5;  grid-row: 3; }
+    .plate-tetes   { grid-column: 9 / -1;      grid-row: 3; }
+    .plate-jemur   { grid-column: 1 / -1;      grid-row: 4; }
+  }
+  .plate {
+    position: relative; overflow: hidden; margin: 0;
+    border-radius: 3px;
+    background: var(--navy);
+    box-shadow: 0 0 0 1px oklch(94% 0.025 85 / 0.14), 0 20px 34px -20px oklch(8% 0.04 270 / 0.95);
+    transition: transform var(--duration) var(--ease), box-shadow var(--duration) var(--ease);
+  }
+  .plate:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 0 0 1px oklch(94% 0.025 85 / 0.45), 0 26px 40px -20px oklch(52% 0.14 258 / 0.55);
+  }
+  .art { position: absolute; inset: 0; overflow: hidden; }
+  .art::before, .art::after, .layer, .glint { content: ''; position: absolute; inset: 0; }
+  .cap {
+    position: absolute; inset: var(--space-1) auto auto var(--space-1); z-index: 3;
+    max-width: calc(100% - var(--space-1) * 2);
+    display: flex; gap: var(--space-2); align-items: center;
+    min-height: 3rem; padding: 0.45rem var(--space-2) 0.45rem 0.45rem;
+    background: oklch(14% 0.045 270 / 0.84);
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+    border-top: 2px solid var(--cotton);
+  }
+  .cap-tag {
+    flex: none; display: grid; place-items: center;
+    min-width: 2.2rem; height: 2.2rem; padding-inline: 0.3rem;
+    font-family: var(--font-mono); font-weight: 700;
+    font-size: var(--text-xs); color: var(--vat-deep);
+    background: var(--cotton);
+    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  }
+  .plate:nth-child(3n + 2) .cap { border-top-color: var(--corn); }
+  .plate:nth-child(3n + 2) .cap-tag { background: var(--corn); }
+  .plate:nth-child(3n) .cap { border-top-color: var(--rust); }
+  .cap-body { display: flex; flex-direction: column; min-width: 0; }
+  .cap-name { font-weight: 800; letter-spacing: -0.01em; color: var(--text); }
+  .cap-note {
+    font-style: normal; font-family: var(--font-mono);
+    font-size: var(--text-xs); color: var(--text-soft);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  /* ── generative cloth — every plate has been in the vat ── */
+
+  /* 01 · Celup (feature) — hard-stop dip bands, deepening downward, feathered edges */
+  .art-celup {
+    background:
+      linear-gradient(180deg,
+        var(--cotton) 0 14%,
+        oklch(88% 0.04 245) 14% 26%,
+        var(--sky) 26% 38%,
+        var(--corn) 38% 50%,
+        var(--woad) 50% 63%,
+        var(--indigo) 63% 77%,
+        var(--navy) 77% 90%,
+        var(--vat-deep) 90%);
+  }
+  .art-celup::before {
+    /* capillary wicking: a soft vertical fringe at every band edge */
+    background: repeating-linear-gradient(90deg, oklch(94% 0.025 85 / 0.0) 0 3px, oklch(94% 0.025 85 / 0.22) 3px 4px, transparent 4px 9px);
+    mask-image: repeating-linear-gradient(180deg, transparent 0 9%, #000 11% 13%, transparent 14%);
+    -webkit-mask-image: repeating-linear-gradient(180deg, transparent 0 9%, #000 11% 13%, transparent 14%);
+  }
+  .art-celup::after {
+    /* the rising tide line, breathing */
+    inset: auto 0 0 0; height: 55%;
+    background: linear-gradient(180deg, transparent, oklch(14% 0.045 270 / 0.75));
+    transform-origin: 50% 100%;
+    will-change: transform, opacity;
+    animation: nl-tide 10s ease-in-out infinite alternate;
+  }
+  @keyframes nl-tide {
+    from { transform: scaleY(0.8); opacity: 0.7; }
+    to   { transform: scaleY(1.15); opacity: 1; }
+  }
+  .art-celup .layer {
+    /* a cotton-resist circle where the cloth was clamped */
+    inset: 20% auto auto 50%;
+    width: min(52%, 16rem); aspect-ratio: 1; height: auto;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    background:
+      repeating-radial-gradient(circle, transparent 0 9px, oklch(94% 0.025 85 / 0.55) 9px 11px),
+      radial-gradient(circle, oklch(94% 0.025 85 / 0.5), transparent 70%);
+    mix-blend-mode: screen;
+    mask-image: radial-gradient(circle, #000 55%, transparent 72%);
+    -webkit-mask-image: radial-gradient(circle, #000 55%, transparent 72%);
+  }
+  .art-celup .glint {
+    inset: auto auto 10% 8%; width: 0.6rem; height: 0.6rem;
+    border-radius: 50%; background: var(--rust);
+    box-shadow: 0 0 0 4px oklch(58% 0.16 38 / 0.3);
+  }
+
+  /* 02 · Ikat — blurred repeating warp, then a diamond clip-path motif cut through */
+  .art-ikat {
+    background: var(--indigo);
+  }
+  .art-ikat::before {
+    inset: -10%;
+    background: repeating-linear-gradient(90deg, var(--cotton) 0 10px, var(--corn) 10px 14px, var(--indigo) 14px 26px, var(--navy) 26px 32px);
+    filter: blur(1.6px);
+    mask-image: repeating-linear-gradient(180deg, #000 0 18px, transparent 22px 30px, #000 34px 46px);
+    -webkit-mask-image: repeating-linear-gradient(180deg, #000 0 18px, transparent 22px 30px, #000 34px 46px);
+    transform: skewY(-3deg);
+  }
+  .art-ikat .layer {
+    background:
+      repeating-linear-gradient(90deg, var(--rust) 0 6px, oklch(40% 0.12 40) 6px 10px, var(--cotton) 10px 14px);
+    filter: blur(1px);
+    clip-path: polygon(50% 12%, 78% 50%, 50% 88%, 22% 50%, 50% 12%, 50% 28%, 34% 50%, 50% 72%, 66% 50%, 50% 28%);
+  }
+  .art-ikat .glint {
+    background: radial-gradient(ellipse 70% 60% at 50% 50%, transparent 40%, oklch(14% 0.045 270 / 0.65));
+  }
+
+  /* 03 · Shibori — itajime conic fold tile, each square holding a ring-resist */
+  .art-shibori {
+    background:
+      conic-gradient(from 0deg at 50% 50%, var(--indigo) 0 25%, var(--navy) 0 50%, var(--indigo) 0 75%, var(--navy) 0) 0 0 / 56px 56px;
+  }
+  .art-shibori::before {
+    background:
+      radial-gradient(circle, var(--cotton) 0 4px, oklch(84% 0.06 250 / 0.7) 6px, transparent 9px, oklch(94% 0.025 85 / 0.5) 11px 12px, transparent 13px) 0 0 / 56px 56px;
+    filter: blur(0.6px);
+  }
+  .art-shibori::after {
+    background:
+      linear-gradient(90deg, oklch(84% 0.06 250 / 0.35) 0 1px, transparent 1px) 27px 0 / 56px 56px,
+      linear-gradient(180deg, oklch(84% 0.06 250 / 0.35) 0 1px, transparent 1px) 0 27px / 56px 56px;
+    mix-blend-mode: screen;
+  }
+
+  /* 04 · Kawung (wide) — four-ellipse palm-fruit tile, a central rust pin */
+  .art-kawung {
+    --k: 52px;
+    background:
+      radial-gradient(circle at 50% 50%, var(--rust) 0 3px, transparent 4px) 0 0 / var(--k) var(--k),
+      radial-gradient(ellipse 22% 42% at 50% 0%, var(--cotton) 0 60%, var(--woad) 64% 74%, transparent 78%) 0 0 / var(--k) var(--k),
+      radial-gradient(ellipse 22% 42% at 50% 100%, var(--cotton) 0 60%, var(--woad) 64% 74%, transparent 78%) 0 0 / var(--k) var(--k),
+      radial-gradient(ellipse 42% 22% at 0% 50%, var(--sky) 0 60%, var(--woad) 64% 74%, transparent 78%) 0 0 / var(--k) var(--k),
+      radial-gradient(ellipse 42% 22% at 100% 50%, var(--sky) 0 60%, var(--woad) 64% 74%, transparent 78%) 0 0 / var(--k) var(--k),
+      var(--navy);
+  }
+  .art-kawung::before {
+    /* the cloth fades into a darker re-dip on the right */
+    background: linear-gradient(90deg, transparent 35%, oklch(28% 0.1 266 / 0.55) 70%, oklch(14% 0.045 270 / 0.88));
+  }
+  .art-kawung::after {
+    inset: -40%;
+    background: linear-gradient(105deg, transparent 44%, oklch(94% 0.025 85 / 0.18) 50%, transparent 56%);
+    will-change: transform;
+    animation: nl-sheen 14s ease-in-out infinite;
+  }
+  @keyframes nl-sheen {
+    0%, 100% { transform: translate3d(-30%, 0, 0); }
+    50%      { transform: translate3d(30%, 0, 0); }
+  }
+
+  /* 05 · Arashi — pole-wrapped storm: 45° and 47° hairlines multiplied into moiré */
+  .art-arashi {
+    background: linear-gradient(180deg, var(--sky), var(--corn));
+  }
+  .art-arashi::before {
+    inset: -40%;
+    background: repeating-linear-gradient(45deg, var(--navy) 0 2px, transparent 2px 7px);
+    mix-blend-mode: multiply;
+  }
+  .art-arashi::after {
+    inset: -40%;
+    background: repeating-linear-gradient(47deg, var(--indigo) 0 2px, transparent 2px 7.3px);
+    mix-blend-mode: multiply;
+    will-change: transform;
+    animation: nl-wind 20s linear infinite alternate;
+  }
+  @keyframes nl-wind { to { transform: rotate(4deg) translate3d(2%, 0, 0); } }
+  .art-arashi .layer {
+    z-index: 1;
+    background: linear-gradient(90deg, oklch(14% 0.045 270 / 0.6), transparent 30% 70%, oklch(14% 0.045 270 / 0.6));
+  }
+
+  /* 06 · Malam — wax-crackle: cotton shards on indigo, the cracks are where dye won */
+  .art-malam {
+    background: var(--indigo);
+  }
+  .art-malam::before {
+    background: var(--cotton-dim);
+    clip-path: polygon(
+      4% 6%, 30% 4%, 28% 30%, 6% 36%,
+      4% 6%, 4% 40%, 26% 34%, 30% 62%, 4% 70%,
+      4% 74%, 32% 66%, 36% 94%, 4% 96%);
+  }
+  .art-malam::after {
+    background: oklch(90% 0.03 82);
+    clip-path: polygon(
+      34% 4%, 62% 6%, 58% 28%, 32% 32%,
+      34% 4%, 32% 36%, 56% 32%, 64% 58%, 36% 62%,
+      40% 66%, 66% 62%, 70% 96%, 40% 94%);
+  }
+  .art-malam .layer {
+    background: var(--cotton);
+    clip-path: polygon(
+      66% 4%, 96% 8%, 94% 40%, 62% 30%,
+      66% 4%, 60% 34%, 92% 44%, 96% 70%, 68% 58%,
+      70% 62%, 96% 74%, 94% 96%, 74% 96%);
+  }
+  .art-malam .glint {
+    /* dye bleeding into the cracks */
+    background:
+      repeating-linear-gradient(118deg, transparent 0 22px, oklch(38% 0.15 264 / 0.6) 22px 23px, transparent 23px 41px),
+      repeating-linear-gradient(28deg, transparent 0 31px, oklch(38% 0.15 264 / 0.5) 31px 32px, transparent 32px 57px);
+    mix-blend-mode: multiply;
+  }
+
+  /* 07 · Tetes — a single drop blooming outward through the weave */
+  .art-tetes {
+    background:
+      repeating-linear-gradient(0deg, oklch(90% 0.025 85) 0 2px, oklch(94% 0.025 85) 2px 4px),
+      var(--cotton);
+  }
+  .art-tetes::before {
+    inset: 50% auto auto 50%;
+    width: 140%; aspect-ratio: 1; height: auto;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle, var(--vat-deep) 0 6%, var(--indigo) 14%, var(--woad) 26%, oklch(70% 0.11 255 / 0.6) 34%, oklch(84% 0.06 250 / 0.35) 40%, transparent 46%);
+    mix-blend-mode: multiply;
+    transform: translate(-50%, -50%) scale(0.9);
+    will-change: transform;
+    animation: nl-bloom 9s ease-in-out infinite alternate;
+  }
+  @keyframes nl-bloom {
+    from { transform: translate(-50%, -50%) scale(0.75); }
+    to   { transform: translate(-50%, -50%) scale(1.05); }
+  }
+  .art-tetes::after {
+    background: radial-gradient(circle at 50% 50%, transparent 0 22%, oklch(64% 0.09 215 / 0.45) 23% 23.5%, transparent 24% 30%, oklch(64% 0.09 215 / 0.3) 31% 31.5%, transparent 32%);
+  }
+  .art-tetes .glint {
+    background: radial-gradient(circle at 44% 44%, oklch(94% 0.025 85 / 0.8) 0 3px, transparent 6px);
+  }
+
+  /* 08 · Jemur (wide) — cloths on a line, each a clip-path panel, swaying in turn */
+  .art-jemur {
+    background:
+      linear-gradient(180deg, oklch(84% 0.06 250) 0%, oklch(70% 0.08 230) 70%, oklch(64% 0.09 215) 100%);
+  }
+  .art-jemur::before {
+    /* the line */
+    inset: 14% 0 auto 0; height: 2px;
+    background: var(--vat-deep);
+    box-shadow: 0 1px 0 oklch(94% 0.025 85 / 0.4);
+  }
+  .art-jemur::after {
+    /* distant fields of dyed cloth */
+    inset: auto 0 0 0; height: 22%;
+    background: repeating-linear-gradient(90deg, var(--navy) 0 30px, var(--indigo) 30px 52px, var(--woad) 52px 64px);
+    clip-path: polygon(0 40%, 20% 20%, 45% 45%, 70% 10%, 100% 35%, 100% 100%, 0 100%);
+    opacity: 0.85;
+  }
+  .art-jemur .layer,
+  .art-jemur .glint {
+    inset: 14% auto 18% 8%;
+    width: clamp(5rem, 22%, 12rem);
+    transform-origin: 50% 0;
+    will-change: transform;
+    animation: nl-sway 6s ease-in-out infinite alternate;
+  }
+  .art-jemur .layer {
+    background:
+      linear-gradient(180deg, var(--cotton) 0 18%, var(--sky) 18% 34%, var(--corn) 34% 52%, var(--woad) 52% 72%, var(--indigo) 72%);
+    clip-path: polygon(0 0, 100% 0, 100% 86%, 88% 100%, 72% 90%, 54% 100%, 36% 90%, 18% 100%, 0 92%);
+  }
+  .art-jemur .glint {
+    left: auto; right: 10%;
+    width: clamp(6rem, 30%, 16rem);
+    background:
+      radial-gradient(ellipse 22% 42% at 50% 0%, var(--cotton) 0 60%, transparent 64%) 0 0 / 36px 36px,
+      radial-gradient(ellipse 22% 42% at 50% 100%, var(--cotton) 0 60%, transparent 64%) 0 0 / 36px 36px,
+      var(--indigo);
+    clip-path: polygon(0 0, 100% 0, 96% 100%, 4% 94%);
+    animation-duration: 7.5s; animation-delay: -3s;
+  }
+  @keyframes nl-sway {
+    from { transform: rotate(-2.5deg) skewX(-2deg); }
+    to   { transform: rotate(2.5deg) skewX(2deg); }
+  }
+
+  /* marquee — glyphs drifting RIGHTWARD on a striped selvedge */
+  .marquee {
+    position: relative;
+    overflow: hidden; max-width: calc(100% + var(--pad) * 2);
+    margin-inline: calc(var(--pad) * -1);
+    padding-block: var(--space-2);
+    background:
+      linear-gradient(var(--cotton), var(--cotton)) 0 0 / 100% 3px no-repeat,
+      linear-gradient(var(--cotton), var(--cotton)) 0 100% / 100% 3px no-repeat,
+      repeating-linear-gradient(90deg, var(--indigo) 0 18px, var(--navy) 18px 22px);
+  }
+  .marquee-track {
+    display: flex; gap: clamp(1.4rem, 5vw, 3.6rem); width: max-content;
+    animation: nl-flow 64s linear infinite; will-change: transform;
+  }
+  .gl { font-size: var(--text-xl); line-height: 1.2; color: var(--cotton); font-family: var(--font-mono); }
+  .gl:nth-child(3n) { color: var(--corn); }
+  .gl:nth-child(5n) { color: var(--rust); }
+  @keyframes nl-flow { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+
+  /* colophon */
+  .colophon {
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 0.5rem;
+    font-family: var(--font-mono); font-size: var(--text-xs);
+    letter-spacing: 0.06em; color: var(--text-soft);
+    border-top: 1px dashed oklch(94% 0.025 85 / 0.4);
+    padding-top: var(--space-2); padding-bottom: var(--space-3);
+  }
+  .pulse { display: inline-flex; align-items: center; gap: 0.6rem; }
+  .pulse .dye-dot {
+    width: 12px;
+    will-change: opacity, transform;
+    animation: nl-pulse 4.6s ease-in-out infinite;
+  }
+  @keyframes nl-pulse {
+    0%, 100% { opacity: 0.5; transform: scale(0.85); }
+    50%      { opacity: 1;   transform: scale(1.15); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stage *, .stage *::before, .stage *::after { animation: none !important; }
+    .plate { transition: none; }
+  }
+</style>
